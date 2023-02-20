@@ -1,0 +1,36 @@
+{
+    "name": "assignment-9---ex2-express-mongo-heroku-adipeled2244",
+    "version": "1.0.0",
+    "description": "[![Open in Visual Studio Code](https://classroom.github.com/assets/open-in-vscode-f059dc9a6f8d3a56e377f745f24479a46679e63a5d9fe6f495e02850cd0d8118.svg)](https://classroom.github.com/online_ide?assignment_repo_id=6408189&assignment_repo_type=AssignmentRepo)",
+    "main": "index.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "start": "nodemon index.js"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/DCS-Shenkar-2022/assignment-9---ex2-express-mongo-heroku-adipeled2244.git"
+    },
+    "author": "",
+    "license": "ISC",
+    "bugs": {
+        "url": "https://github.com/DCS-Shenkar-2022/assignment-9---ex2-express-mongo-heroku-adipeled2244/issues"
+    },
+    "homepage": "https://github.com/DCS-Shenkar-2022/assignment-9---ex2-express-mongo-heroku-adipeled2244#readme",
+    "dependencies": {
+        "@sendgrid/mail": "^7.7.0",
+        "axios": "^0.24.0",
+        "child_process": "^1.0.2",
+        "express": "^4.17.1",
+        "googleapis": "^111.0.0",
+        "moment": "^2.29.1",
+        "mongoose": "^6.0.13",
+        "mongoose-sequence": "^5.3.1",
+        "nodemailer": "^6.9.1",
+        "winston": "^3.8.2"
+    },
+    "devDependencies": {
+        "dotenv": "^10.0.0",
+        "nodemon": "^2.0.15"
+    }
+}
