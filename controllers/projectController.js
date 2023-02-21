@@ -53,7 +53,6 @@ exports.projectController = {
 
         try {
             updateResult = await projectService.updateProject(projectIdParam,projectParams);
-            logger.info(updateResult);
             if (updateResult.matchedCount == 1) {
                 return res.status(200).json({ message:"Project updated"});
             } else {
