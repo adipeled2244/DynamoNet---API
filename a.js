@@ -3,6 +3,8 @@ const { isErrored } = require('stream');
 const pythonProcess = spawn('python', ['./python/tweepy.py',"1","2"]);
 const {sendMailFromDynamoNet} = require('./helpers/mailSender.js')
 
+
+
 pythonProcess.stdout.on('data', (data) => {
   console.log(`${data}`);
 });

@@ -1,12 +1,15 @@
-const serviceProject = require('../dbCalls/db_projects')
+const projectService = require('../services/projectService')
 const logger= require('../helpers/winston')
+const path = require('path');
 
 exports.projectController = {
-    async getProjectByProjectId(req, res) {
+
+    async getProject(req, res) {
+        logger.info(`[getProject] - ${path.basename(__filename)}`);
         let project;
         const projectIdParam = req.params.projectId;
         try {
-            project = await serviceProject.getProjectByProjectId(projectIdParam);
+            project = await projectService.getProject(projectIdParam);
             res.status(200).json({project})
         } catch (err) {
             res.status(500).send({ error: `Error get project: ${projectIdParam} : ${err}` });
@@ -14,79 +17,64 @@ exports.projectController = {
         }
     },
 
-    //waiting to noor
+    async getProjects(req, res) {
+        logger.info(`[getProjects] - ${path.basename(__filename)}`);
+        let projects;
+        try {
+            projects = await projectService.getProjects();
+            res.status(200).json({projects})
+        } catch (err) {
+            res.status(500).send({ error: `Error get projects : ${err}` });
+            return;
+        }
+    },
+
+    //TO DO: Change according to noor
     async addProject(req, res) {
+        logger.info(`[addProject] - ${path.basename(__filename)}`);
         const projectParams = req.body;
         if(!projectParams){
             res.status(400).send({error: 'invalid params'})
         }       
         projectParams.createdDate =  Date.now();
         try {
-            const newProject = await serviceProject.addProject(projectParams);
+            const newProject = await projectService.addProject(projectParams);
             res.status(200).json({project: newProject});
         } catch (err) {
             res.status(400).json({ error: ` ${err}` });
             return;
         }
     },
-    async updateFlight(req, res) {
-
+    async updateProject(req, res) {
+        logger.info(`[updateProject] - ${path.basename(__filename)}`);
+        const projectIdParam = req.params.projectId;
+        const projectParams = req.body;
         let updateResult;
 
-        if (!req.body.flightDate || !req.body.origin || !req.body.destination) {
-            res.status(400).json({ error: `Parameters for update  are missing` });
-            return;
-        }
-
         try {
-            updateResult = await Flight.updateOne({ flightId: req.params.flightId }, { flightDate: req.body.flightDate, origin: req.body.origin, destination: req.body.destination });
-        } catch (err) {
-            res.status(500).json({ error: `Error update flight ${req.params.flightId} : ${err}` });
-            return;
-        }
-
-        if (updateResult.matchedCount == 1) {
-            res.status(200).json({ message: "The flight updated" });
-        } else {
-            res.status(404).json({ error: "Flight id not found" });
-        }
-
-    },
-    async getFlights(req, res) {
-        let flights;
-        try {
-            if(req.query.destination){
-                flights = await Flight.find({"destination":"london"});
-            }else{
-                flights = await Flight.find({});
+            updateResult = await projectService.updateProject(projectIdParam,projectParams);
+            logger.info(updateResult);
+            if (updateResult.matchedCount == 1) {
+                return res.status(200).json({ message:"Project updated"});
+            } else {
+                return res.status(404).json({ error: "Project id not found" });
             }
-            
         } catch (err) {
-            res.status(500).json({ error: `Error get all flights : ${err}` });
+            res.status(500).json({ error: `Error update project ${projectIdParam} : ${err}` });
             return;
-        }
-        if (flights[0]){
-            res.status(200).json(flights);
-        }
-        else{
-            res.status(200).json({ message: "There are not any flights" });
         }
 
     },
-    async deleteFlight(req, res) {
+    async deleteProject(req, res) {
+        logger.info(`[deleteProject] - ${path.basename(__filename)}`);
+        const projectIdParam = req.params.projectId;
         let deleteResult;
         try {
-            deleteResult = await Flight.deleteOne({ flightId: req.params.flightId }, );
+            deleteResult = await projectService.deleteProject(projectIdParam);
+            return  res.status(200).json({ message: `Project deleted` });
         } catch (err) {
-            res.status(500).json({ error: `Error deleting flight ${req.params.flightId} : ${err}` });
+            res.status(500).json({ error: `Error deleting project ${projectIdParam} : ${err}` });
             return;
         }
-
-        if (deleteResult.deletedCount == 1) {
-            res.status(200).json({ message: `Flight number: ${req.params.flightId} deleted  ` });
-        } else {
-            res.status(404).json({ error: `Flight number: ${req.params.flightId} not found` });
-        }
-
     }
 };

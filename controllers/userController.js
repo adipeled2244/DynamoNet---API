@@ -1,33 +1,37 @@
-const serviceProject = require('../dbCalls/db_projects')
+const userService = require('../services/userService')
+const path = require('path');
+
 const logger= require('../helpers/winston')
 
 exports.userController = {
-    async getProjectByProjectId(req, res) {
-        let project;
-        const projectIdParam = req.params.projectId;
+    async getUser(req, res) {
+        let user;
+        const userIdParam = req.params.userId;
         try {
-            project = await serviceProject.getProjectByProjectId(projectIdParam);
-            res.status(200).json({project})
+            user = await userService.getUser(userIdParam);
+            res.status(200).json({user})
         } catch (err) {
-            res.status(500).send({ error: `Error get project: ${projectIdParam} : ${err}` });
+            res.status(500).send({ error: `Error get user: ${userIdParam} : ${err}` });
             return;
         }
     },
-    async addProject(req, res) {
-        const projectParams = req.body;
-        if(!projectParams){
+
+    //signup
+    async addUser(req, res) {
+        const userParams = req.body;
+        if(!userParams){
             res.status(400).send({error: 'invalid params'})
         }       
-        projectParams.createdDate =  Date.now();
+        userParams.registrationDate =  Date.now();
         try {
-            const newProject = await serviceProject.addProject(projectParams);
-            res.status(200).json({project: newProject});
+            const newUser = await userService.addUser(userParams);
+            res.status(200).json({user: userParams});
         } catch (err) {
             res.status(400).json({ error: ` ${err}` });
             return;
         }
     },
-    async updateFlight(req, res) {
+    async updateUser(req, res) {
 
         let updateResult;
 
@@ -50,41 +54,37 @@ exports.userController = {
         }
 
     },
-    async getFlights(req, res) {
-        let flights;
+ 
+    async updateUser(req, res) {
+        logger.info(`[updateUser] - ${path.basename(__filename)}`);
+        const userIdParam = req.params.userId;
+        const  userParams = req.body;
+        let updateResult;
+
         try {
-            if(req.query.destination){
-                flights = await Flight.find({"destination":"london"});
-            }else{
-                flights = await Flight.find({});
+            updateResult = await userService.updateUser(userIdParam,userParams);
+            if (updateResult.matchedCount == 1) {
+                return res.status(200).json({ message:"User updated"});
+            } else {
+                return res.status(404).json({ error: "User id not found" });
             }
-            
         } catch (err) {
-            res.status(500).json({ error: `Error get all flights : ${err}` });
+            res.status(500).json({ error: `Error update user ${userIdParam} : ${err}` });
             return;
-        }
-        if (flights[0]){
-            res.status(200).json(flights);
-        }
-        else{
-            res.status(200).json({ message: "There are not any flights" });
         }
 
     },
-    async deleteFlight(req, res) {
+    async deleteUser(req, res) {
+        logger.info(`[deleteUser] - ${path.basename(__filename)}`);
+        const userIdParam = req.params.userId;
         let deleteResult;
         try {
-            deleteResult = await Flight.deleteOne({ flightId: req.params.flightId }, );
+            deleteResult = await userService.deleteUser(userIdParam);
+            return res.status(200).json({ message: `User deleted` });
         } catch (err) {
-            res.status(500).json({ error: `Error deleting flight ${req.params.flightId} : ${err}` });
+            res.status(500).json({ error: `Error deleting user ${userIdParam} : ${err}` });
             return;
         }
-
-        if (deleteResult.deletedCount == 1) {
-            res.status(200).json({ message: `Flight number: ${req.params.flightId} deleted  ` });
-        } else {
-            res.status(404).json({ error: `Flight number: ${req.params.flightId} not found` });
-        }
-
     }
+ 
 };
