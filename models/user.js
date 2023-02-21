@@ -9,6 +9,7 @@ const userSchema = new Schema({
         // https://stackoverflow.com/questions/44995922/mongoose-nodejs-schema-with-array-of-refs
     registrationDate: { type: Date },
     password: { type: String, required: true },
+    salt: { type: String, required: true },
 }, { collection: 'users' });
 
 const User = model('User', userSchema);

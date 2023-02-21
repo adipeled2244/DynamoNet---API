@@ -1,22 +1,72 @@
-const User = require('../models/user');
-const moment = require('moment');
+const User = require("../models/user");
+const moment = require("moment");
+const logger = require("../helpers/winston");
+const bcrypt = require("bcrypt");
+const saltRounds = 10;
+const userService = require("../services/userService");
 
 exports.authController = {
-    
-    async addAuth(req, res) {
-        const generateKey = 1 + Math.floor(Math.random() * 10000000);
-        let userUpdated;
+  async signUp(req, res) {
+    const userParams = req.body;
 
-        try {
-            userUpdated = await User.updateOne({ userIdCard: req.body.userIdCard }, { userDateTimeKey: moment().unix(), userKey: generateKey })
-        } catch (err) {
-            res.status(500).json({ Error: `Error add key ${req.params.flightId} : ${err} ` });
-            return;
-        }
-        if (userUpdated.matchedCount == 1) {
-            res.status(200).json({ message: `user ${req.body.userIdCard} your key for 10 minutes is : ${generateKey}  ` });
-        } else {
-            res.status(404).json({ message: "User not found" });
-        }
+    // check if user exist
+    try {
+      const user = await userService.getUserByEmail(userParams.email);
+      if (!user) {
+        res.status(400).json({ error: `User already exist` });
+        return;
+      }
+    } catch (err) {
+      res
+        .status(500)
+        .json({ error: `Error get user: ${userParams.email} : ${err}` });
+      return;
     }
-}
+    // if user does not exist, create new user
+    const salt = bcrypt.genSaltSync(saltRounds);
+    const newUser = new User({
+      email: userParams.email,
+      name: userParams.name,
+      registrationDate: moment().format("YYYY-MM-DD HH:mm:ss"),
+      salt: salt,
+      password: bcrypt.hashSync(userParams.password, salt),
+    });
+    // save new user
+    try {
+      const user = await userService.addUser(newUser);
+      res.status(200).json({ user: user });
+    } catch (err) {
+      res.status(400).json({ error: ` ${err}` });
+      return;
+    }
+  },
+  async signIn(req, res) {
+    const userParams = req.body;
+    const email = userParams.email;
+    const password = userParams.password;
+    // check if user exist
+    try {
+      const user = await userService.getUserByEmail(email);
+      if (!user) {
+        res.status(400).json({ error: `User does not exist` });
+        return;
+      }
+    } catch (err) {
+      res.status(500).json({ error: `Error get user: ${email} : ${err}` });
+      return;
+    }
+    // if user exist, check password
+    try {
+      const user = await userService.getUserByEmail(email);
+      const hash = bcrypt.hashSync(password, user.salt);
+      if (hash === user.password) {
+        res.status(200).json({ user: user });
+      } else {
+        res.status(400).json({ error: `Wrong password` });
+      }
+    } catch (err) {
+      res.status(500).json({ error: `Error get user: ${email} : ${err}` });
+      return;
+    }
+  },
+};

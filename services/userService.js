@@ -8,7 +8,8 @@ module.exports={
     getUserByTwitterId,
     deleteUser,
     getUsers,
-    getProjectByUserId
+    getProjectByUserId,
+    getUserByEmail
 }
 
 async function addUser(params){
@@ -32,6 +33,13 @@ async function getProjectByUserId(userId){
 async function getUser(id){
     logger.info(`[getUser] - ${path.basename(__filename)}`);
     return await User.find({_id:id});
+}
+
+async function getUserByEmail(email) {
+    logger.info(`[getUser] - ${path.basename(__filename)}`);
+    const user= await User.find({email});
+    if(user) return user;
+    return null;
 }
 
 async function getUserByTwitterId(twitterId){

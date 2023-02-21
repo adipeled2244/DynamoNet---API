@@ -10,7 +10,12 @@ exports.projectController = {
         const projectIdParam = req.params.projectId;
         try {
             project = await projectService.getProject(projectIdParam);
-            res.status(200).json({project})
+            if(project){
+            return res.status(200).json({project})
+            }
+            else{
+                return res.status(404).json({ error: "Project id not found" });
+            }
         } catch (err) {
             res.status(500).send({ error: `Error get project: ${projectIdParam} : ${err}` });
             return;

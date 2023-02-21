@@ -20,6 +20,7 @@
     "dependencies": {
         "@sendgrid/mail": "^7.7.0",
         "axios": "^0.24.0",
+        "bcrypt": "^5.1.0",
         "child_process": "^1.0.2",
         "express": "^4.17.1",
         "googleapis": "^111.0.0",
