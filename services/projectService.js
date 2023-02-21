@@ -30,7 +30,7 @@ async function getProjectByUserId(userId){
 
 async function getProject(projectId){
     logger.info(`[getProject] - ${path.basename(__filename)}`);
-    return await Project.find({_id: projectId});
+    return await Project.findOne({_id: projectId});
 }
 async function getProjects(){
     logger.info(`[getProject] - ${path.basename(__filename)}`);

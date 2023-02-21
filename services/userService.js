@@ -1,49 +1,59 @@
 const User=require('../models/user')
 const logger= require('../helpers/winston')
+const path = require("path");
+const ObjectId = require("mongoose").Types.ObjectId;
 
 module.exports={
     addUser,
     updateUser,
-    getUserById,
     getUserByTwitterId,
     deleteUser,
     getUsers,
     getProjectByUserId,
-    getUserByEmail
+    getUserByEmail,
+    getUser,
+    addProjectToUser
 }
 
 async function addUser(params){
-    logger.info("[addUser] - db.js");
+    logger.info(`[addUser] - ${path.basename(__filename)}`);
     const newUser=new User(params);
     await newUser.save();
     return newUser;
 }
 
 async function updateUser(id,params){
-    logger.info("[updateUser] - db.js");
+    logger.info(`[updateUser] - ${path.basename(__filename)}`);
     return await User.findByIdAndUpdate(id,params);
 }
 
+async function addProjectToUser(id,params){
+    logger.info(`[addProjectToUser] - ${path.basename(__filename)}`);
+    console.log(ObjectId(id))
+    console.log(ObjectId(params))
+    return await User.updateOne({ _id: id }, { $push: { projectsRefs: ObjectId(params) } });
+}
+
 async function getProjectByUserId(userId){
-    //לוודא שהוא אובגקט איידי
     logger.info(`[getProjectByUserId] - ${path.basename(__filename)}`);
     return await Project.find({userRef:userId});
 }
 
 async function getUser(id){
     logger.info(`[getUser] - ${path.basename(__filename)}`);
-    return await User.find({_id:id});
+
+    return await User.findOne({_id:id});
 }
 
 async function getUserByEmail(email) {
     logger.info(`[getUser] - ${path.basename(__filename)}`);
-    const user= await User.find({email});
+    const user= await User.findOne({email});
     if(user) return user;
     return null;
 }
 
 async function getUserByTwitterId(twitterId){
-    logger.info("[getUserByTwitterId] - db.js");
+    logger.info(`[getUserByTwitterId] - ${path.basename(__filename)}`);
     return await User.find({twitterId});
 }
 

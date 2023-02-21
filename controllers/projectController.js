@@ -29,7 +29,7 @@ exports.projectController = {
             projects = await projectService.getProjects();
             res.status(200).json({projects})
         } catch (err) {
-            res.status(500).send({ error: `Error get projects : ${err}` });
+            res.status(500).json({ error: `Error get projects : ${err}` });
             return;
         }
     },
@@ -38,12 +38,19 @@ exports.projectController = {
     async addProject(req, res) {
         logger.info(`[addProject] - ${path.basename(__filename)}`);
         const projectParams = req.body;
+        const userId=projectParams.userId;
+
         if(!projectParams){
             res.status(400).send({error: 'invalid params'})
         }       
         projectParams.createdDate =  Date.now();
         try {
             const newProject = await projectService.addProject(projectParams);
+            const updateUserRes= await userService.updateUser(newProject._id);
+s
+            
+            //ADD PROJECT TO USER
+            
             res.status(200).json({project: newProject});
         } catch (err) {
             res.status(400).json({ error: ` ${err}` });

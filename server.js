@@ -1,7 +1,10 @@
 const express = require("express");
+const {authRouter} = require("./routers/authRouter");
 const {projectRouter} = require("./routers/projectRouter");
+const {userRouter} = require("./routers/userRouter");
 const winston = require('winston');
 const moment=require('moment');
+const path = require("path");
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -22,8 +25,9 @@ app.use('/', (req, res,next) => {
     next();
 });
 
+app.use('/api/auth', authRouter);
 app.use('/api/projects', projectRouter);
-//app.use('/api/users', projectRouter);
+app.use('/api/users', userRouter);
 
 app.use((req, res) => {
     res.status(404).send(`Page not found`);

@@ -4,6 +4,7 @@ const logger = require("../helpers/winston");
 const bcrypt = require("bcrypt");
 const saltRounds = 10;
 const userService = require("../services/userService");
+const path = require("path");
 
 exports.authController = {
   async signUp(req, res) {
@@ -12,7 +13,9 @@ exports.authController = {
     // check if user exist
     try {
       const user = await userService.getUserByEmail(userParams.email);
-      if (!user) {
+      console.log("adikaaaaaa")
+      console.log(user)
+      if (user) {
         res.status(400).json({ error: `User already exist` });
         return;
       }
