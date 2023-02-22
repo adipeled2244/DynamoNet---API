@@ -3,8 +3,8 @@ const { Schema, model } = require("mongoose");
 
 const timeRangeSchema = new Schema(
   {
-    startTime: { type: Date, required: true },
-    endTime: { type: Date, required: true },
+    startDate: { type: Date, required: true },
+    endDate: { type: Date, required: true },
     numberOfNodes: { type: Number, required: true },
     numberOfEdges: { type: Number, required: true },
     density: { type: Number, required: true },
