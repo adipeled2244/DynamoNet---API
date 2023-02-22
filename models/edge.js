@@ -1,11 +1,14 @@
-const { Schema, model } = require('mongoose');
+const { Schema, model } = require("mongoose");
 
-const edgeSchema = new Schema({
+const edgeSchema = new Schema(
+  {
     source: { type: String, required: true },
     destination: { type: String, required: true },
     edgeContent: { type: String, required: true },
     timestamp: { type: Date },
-}, { collection: 'edges' });
+  },
+  { collection: "edges" }
+);
 
-const Edge = model('Edge', edgeSchema);
+const Edge = model("Edge", edgeSchema);
 module.exports = Edge;

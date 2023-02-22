@@ -1,7 +1,8 @@
-const { Schema, model } = require('mongoose');
+const { Schema, model } = require("mongoose");
 // const mongoose = require('mongoose');
 
-const projectSchema = new Schema({
+const timeRangeSchema = new Schema(
+  {
     startTime: { type: Date, required: true },
     endTime: { type: Date, required: true },
     numberOfNodes: { type: Number, required: true },
@@ -12,9 +13,9 @@ const projectSchema = new Schema({
     diameter: { type: Number, required: true },
     clustetingCoefficient: { type: Number, required: true },
     network: { type: Network, required: true },
-    
-}, { collection: 'projects' });
+  },
+  { collection: "timeRanges" }
+);
 
-
-const Project = model('Project', projectSchema);
-module.exports = Project;
+const TimeRange = model("TimeRange", timeRangeSchema);
+module.exports = TimeRange;

@@ -1,17 +1,21 @@
-const { Schema, model } = require('mongoose');
+const { Schema, model } = require("mongoose");
 // const mongoose = require('mongoose');
 // const Network = require('./network');
 
-const projectSchema = new Schema({
-   createdDate: { type: Date, required: true },
-   //userRef: { type: Schema.Types.ObjectId, ref: "User" },
+const projectSchema = new Schema(
+  {
+    createdDate: { type: Date, required: true, index: true },
+    //userRef: { type: Schema.Types.ObjectId, ref: "User" },
     title: { type: String, required: true },
     description: { type: String, required: true },
     dataset: { type: [String], required: true },
     edgeType: { type: String, required: true },
-    timeRanges: { type: [Object] },
+    timeRanges: { type: Schema.Types.ObjectId, ref: "TimeRange" },
     // networks: { type: [Network] },
-}, { collection: 'projects' });
+    networks: [{ type: Schema.Types.ObjectId, ref: "Network" }],
+  },
+  { collection: "projects" }
+);
 
-const Project = model('Project', projectSchema);
+const Project = model("Project", projectSchema);
 module.exports = Project;
