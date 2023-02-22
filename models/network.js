@@ -1,5 +1,4 @@
 const { Schema, model } = require("mongoose");
-const Edge = require("./edge");
 
 const networkSchema = new Schema(
   {
