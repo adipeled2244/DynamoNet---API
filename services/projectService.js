@@ -30,11 +30,12 @@ async function getProjectByUserId(userId){
 
 async function getProject(projectId){
     logger.info(`[getProject] - ${path.basename(__filename)}`);
-    return await Project.findOne({_id: projectId});
+    return await Project.findOne({_id: projectId}).populate('networks',"-edges");
 }
+
 async function getProjects(){
     logger.info(`[getProject] - ${path.basename(__filename)}`);
-    return await Project.find({});
+    return await Project.find({}).populate('networks',"-edges");
 }
 
 async function deleteProject(projectId){

@@ -284,3 +284,11 @@ info:  DELETE |  /api/nodes/63f64b7789bc0a533f6c0ec9  | Wed Feb 22 2023 19:06:52
 info:  GET |  /api/nodes/63f64b7789bc0a533f6c0ec9  | Wed Feb 22 2023 19:06:57 GMT+0200  
 info:  POST |  /api/nodes  | Wed Feb 22 2023 19:07:57 GMT+0200  
 info:  GET |  /api/nodes/30354991000000000000000  | Wed Feb 22 2023 19:08:03 GMT+0200  
+info:  GET |  /api/projects  | Wed Feb 22 2023 19:12:13 GMT+0200  
+info:  GET |  /api/projects  | Wed Feb 22 2023 19:14:48 GMT+0200  
+info:  GET |  /api/projects/63f6448a4dca11a8ec1ece03  | Wed Feb 22 2023 19:15:20 GMT+0200  
+info:  GET |  /api/projects  | Wed Feb 22 2023 19:16:13 GMT+0200  
+info:  GET |  /api/projects/63f6448a4dca11a8ec1ece03  | Wed Feb 22 2023 19:18:27 GMT+0200  
+info:  GET |  /api/projects/63f6448a4dca11a8ec1ece03  | Wed Feb 22 2023 19:18:42 GMT+0200  
+info:  GET |  /api/projects/63f6448a4dca11a8ec1ece03  | Wed Feb 22 2023 19:19:10 GMT+0200  
+info:  GET |  /api/projects/  | Wed Feb 22 2023 19:19:19 GMT+0200  
