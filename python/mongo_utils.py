@@ -188,8 +188,13 @@ class MongoWrapper:
     def get_edges_from_edge_collection(self, edges):
         self.edges_collection_setup()
         edges_collection = self.get_collection('edges')
-        return edges_collection.find({'source': {'$in': [str(edge.source.id) for edge in edges]}})
+        return edges_collection.find({'_id': {'$in': [ObjectId(edge) for edge in edges]}})
 
+    def get_edges_from_edge_collection_in_range(self, edges, start_date, end_date):
+        self.edges_collection_setup()
+        edges_collection = self.get_collection('edges')
+        return edges_collection.find({'_id': {'$in': [ObjectId(edge) for edge in edges]}, 'timestamp': {'$gte': start_date, '$lte': end_date}})
+        
     def networks_collection_setup(self):
         network_validator = {
             '$jsonSchema': {
@@ -309,6 +314,7 @@ class MongoWrapper:
     def get_project_from_projects_collection_by_object_id(self, object_id):
         self.projects_collection_setup()
         projects_collection = self.get_collection('projects')
+        # get project without time ranges and networks, {'timeRanges': 0, 'networks': 0}
         return projects_collection.find_one({'_id': ObjectId(object_id)})
 
     def get_projects_from_projects_collection(self):
@@ -397,8 +403,8 @@ def get_project(project_id, mongo_host, db_name):
     project = mongo.get_project_from_projects_collection_by_object_id(project_id)
     if project is None:
         return None
-    project['timeRanges'] = [mongo.get_time_range_from_timeRanges_collection_by_object_id(time_range_id) for time_range_id in project['timeRanges']]
-    project['networks'] = [mongo.get_network_from_networks_collection_by_object_id(network_id) for network_id in project['networks']]
+    # project['timeRanges'] = [mongo.get_time_range_from_timeRanges_collection_by_object_id(time_range_id) for time_range_id in project['timeRanges']]
+    # project['networks'] = [mongo.get_network_from_networks_collection_by_object_id(network_id) for network_id in project['networks']]
     mongo.close()
     return project
 
@@ -426,24 +432,40 @@ def save_users(users, mongo_host, db_name):
     mongo.close()
     return users_response.inserted_ids
 
-from config import mongo_host
-
-def main():
-    project = Project(
-        title="test project - python",
-        description="test project description - python",
-        dataset=['BernieSanders', 'KamalaHarris'],
-        startDate=datetime.datetime(2020, 6, 1),
-        endDate=datetime.datetime(2020, 6, 30),
-        edgeType='retweet',
-        timeRanges=[],
-        networks=[]
+def create_time_range(network, start_date, end_date, mongo):
+    edges_in_time_range_cursor = mongo.get_edges_from_edge_collection_in_range(network['edges'], start_date, end_date)
+    time_range_edges = [edge for edge in edges_in_time_range_cursor]
+    time_range_network = Network(networkType=network['networkType'])
+    time_range_network.edges = [
+        Edge (
+            source=edge['source'],
+            destination=edge['destination'],
+            timestamp=edge['timestamp'],
+            edgeContent=edge['edgeContent'],
+            _id=edge['_id']
+        )
+    for edge in time_range_edges]
+    time_range = TimeRange(
+        startDate=start_date,
+        endDate=end_date,
+        network=time_range_network
     )
+    return time_range
 
-    mongo = MongoWrapper(mongo_host, 'test')
-    project_object_id = mongo.save_project_to_projects_collection(project)
+def save_time_range(time_range, project_id, mongo):
+    network_object_id = mongo.save_network_to_networks_collection(time_range.network, [edge._id for edge in time_range.network.edges])
+    time_range_object_id = mongo.save_time_range_to_timeRanges_collection(time_range, network_object_id.inserted_id)
+    return mongo.insert_time_range_into_project(project_id, time_range_object_id.inserted_id)
+
+def create_multiple_time_ranges(project_id, network_id, time_windows, mongo_host, db_name):
+    mongo = MongoWrapper(mongo_host, db_name)
+    network = mongo.get_network_from_networks_collection_by_object_id(network_id)
+    time_ranges = []
+    for time_window in time_windows:
+        start_date = time_window['start_date']
+        end_date = time_window['end_date']
+        time_range = create_time_range(network, start_date, end_date, mongo)
+        save_time_range(time_range, project_id, mongo)
+        time_ranges.append(time_range)
     mongo.close()
-    print(project_object_id.inserted_id)
-
-if __name__ == '__main__':
-    main()
+    return time_ranges

@@ -48,11 +48,12 @@ class Network:
         self.freemanDegreeCentrality = None
 
 class Edge:
-    def __init__(self, source, destination, timestamp, edgeContent):
+    def __init__(self, source, destination, timestamp, edgeContent, _id=None):
         self.source = source
         self.destination = destination
         self.timestamp = timestamp
         self.edgeContent = edgeContent
+        self._id = _id
 
 class Project:
     def __init__(self, title, description, dataset, startDate, endDate, edgeType, timeRanges, networks):
