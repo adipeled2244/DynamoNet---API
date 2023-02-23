@@ -15,8 +15,8 @@ const sendMailFromDynamoNet = async (sendTo) => {
   const mailOptions = {
     from: process.env.EMAIL,
     to: sendTo,
-    subject: "Sending Email using Node.js",
-    text: "That was easy!",
+    subject: "Data is ready ! ",
+    text: "",
   };
 
   transporter.sendMail(mailOptions, function (err, data) {

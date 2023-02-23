@@ -1,6 +1,9 @@
 const projectService = require('../services/projectService')
 const logger= require('../helpers/winston')
 const path = require('path');
+const { spawn } = require('child_process');
+const { isErrored } = require('stream');
+const userService = require("../services/userService");
 
 exports.projectController = {
 
@@ -46,9 +49,30 @@ exports.projectController = {
         projectParams.createdDate =  Date.now();
         try {
             const newProject = await projectService.addProject(projectParams);
+            console.log(newProject)
+
+            const pythonProcess = spawn('python', ['./python/virtual_twitter.py',`--project_id=${newProject._id}`]);
+
+            // const arrayChange= projectParams.datesArray.join(" ");
+            // const pythonProcess = spawn('python', ['./python/createMultipleTimeRanges.py',`--project_id=${newProject._id}`,`--datesArray=${arrayChange}`]);
+            pythonProcess.stdout.on('data', (data) => {
+                console.log(`this is the data from noor`);
+                console.log(`${data}`);
+              });
+              pythonProcess.stderr.on('data', (data) => {
+                console.error(`stderr: ${data}`);
+              });
+               pythonProcess.on('close', (data) => {
+                try{
+                console.log(`close: ${data}`);
+                }catch(err){
+                  console.error(`close: ${err}`);
+              
+                }
+              });
+            //add projectRef to user projects
             const updateUserRes= await userService.updateUser(newProject._id);
-s
-            
+
             //ADD PROJECT TO USER
             
             res.status(200).json({project: newProject});
