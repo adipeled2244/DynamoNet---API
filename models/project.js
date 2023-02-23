@@ -13,7 +13,6 @@ const projectSchema = new Schema(
     endDate: { type: Date, required: true },
     edgeType: { type: String, required: true },
     timeRanges: [{ type: Schema.Types.ObjectId, ref: "TimeRange" }],
-    // networks: { type: [Network] },
     networks: [{ type: Schema.Types.ObjectId, ref: "Network" }],
   },
   { collection: "projects" }
