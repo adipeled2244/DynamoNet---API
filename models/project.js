@@ -5,7 +5,6 @@ const { Schema, model } = require("mongoose");
 const projectSchema = new Schema(
   {
     createdDate: { type: Date, required: true, index: true },
-    //userRef: { type: Schema.Types.ObjectId, ref: "User" },
     title: { type: String, required: true },
     description: { type: String, required: true },
     dataset: { type: [String], required: true },
