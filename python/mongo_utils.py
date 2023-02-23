@@ -1,8 +1,9 @@
 import datetime
 from pymongo import MongoClient
 from bson import ObjectId
+import metrics_utils
 
-from class_utils import Project, Network, Edge, User, TimeRange
+from class_utils import Project, Network, Edge, User
 
 class MongoWrapper:
     def __init__(self, mongo_host, db_name):
@@ -211,7 +212,35 @@ class MongoWrapper:
                         'items': {
                             'bsonType': 'objectId',
                         }
-                    }
+                    },
+                    "numberOfNodes": {
+                        'bsonType': 'int',
+                        'description': 'must be an integer'
+                    },
+                    "numberOfEdges": {
+                        'bsonType': 'int',
+                        'description': 'must be an integer'
+                    },
+                    "density": {
+                        'bsonType': 'double',
+                        'description': 'must be a double'
+                    },
+                    "diameter": {
+                        'bsonType': 'double',
+                        'description': 'must be an integer'
+                    },
+                    "radius": {
+                        'bsonType': 'double',
+                        'description': 'must be an integer'
+                    },
+                    "reciprocity": {
+                        'bsonType': 'double',
+                        'description': 'must be a double'
+                    },
+                    "degreeCentrality": {
+                        'bsonType': 'double',
+                        'description': 'must be a double'
+                    },
                 }
             }
         }
@@ -224,7 +253,14 @@ class MongoWrapper:
         networks_collection = self.get_collection('networks')
         return networks_collection.insert_one({
             "networkType" : network.networkType,
-            "edges" : [ ObjectId(edge_id) for edge_id in edges_object_ids ]
+            "edges" : [ ObjectId(edge_id) for edge_id in edges_object_ids ],
+            "numberOfNodes" : network.numberOfNodes,
+            "numberOfEdges" : network.numberOfEdges,
+            "density" : network.density,
+            "diameter" : network.diameter,
+            "radius" : network.radius,
+            "reciprocity" : network.reciprocity,
+            "degreeCentrality" : network.degreeCentrality
         })
 
     def get_network_from_networks_collection_by_object_id(self, object_id):
@@ -465,7 +501,9 @@ def create_multiple_time_ranges(project_id, network_id, time_windows, mongo_host
         start_date = time_window['start_date']
         end_date = time_window['end_date']
         time_range = create_time_range(network, start_date, end_date, mongo)
+        metrics_utils.calculateNetworkMetrics(time_range.network)
         save_time_range(time_range, project_id, mongo)
         time_ranges.append(time_range)
     mongo.close()
     return time_ranges
+    

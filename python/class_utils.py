@@ -18,11 +18,6 @@ class User:
 
     def __str__(self):
         return f'{self.id}'
-
-    # JSON serializer for objects not serializable by default json code
-    def toJSON(self):
-        return json.dumps(self, default=lambda o: o.__dict__, 
-            sort_keys=True, indent=4)
             
 class Tweet:
     def __init__(self, id, text, created_at, user):
@@ -37,7 +32,7 @@ class Tweet:
 class Network:
     def __init__(self, networkType):
         self.networkType = networkType
-        self.nodes = {}
+        self.nodes = None
         self.edges = []
         self.numberOfNodes = None
         self.numberOfEdges = None
@@ -45,7 +40,7 @@ class Network:
         self.diameter = None
         self.radius =None
         self.reciprocity = None
-        self.freemanDegreeCentrality = None
+        self.degreeCentrality = None
 
 class Edge:
     def __init__(self, source, destination, timestamp, edgeContent, _id=None):
