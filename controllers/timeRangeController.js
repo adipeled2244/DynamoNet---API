@@ -54,12 +54,17 @@ exports.timeRangeController = {
     }
     try {
       const { projectId, networkId, timeWindows } = timeRangeParams;
-      const pythonProcess = spawn("python", [
-        "./python/create_time_ranges.py",
-        `--project_id=${projectId}`,
-        `--network_id=${networkId}`,
-        `--time_windows=${JSON.stringify(timeWindows)}`,
-      ]);
+      const pythonProcess = spawn(
+        "python",
+        [
+          "./python/create_time_ranges.py",
+          `--project_id=${projectId}`,
+          `--network_id=${networkId}`,
+          `--time_windows=${JSON.stringify(timeWindows)}`,
+        ],
+        (options = { detached: true })
+      );
+      pythonProcess.unref();
       pythonProcess.stdout.on("data", (data) => {
         console.log(`data in TR`);
         console.log(`${data}`);
