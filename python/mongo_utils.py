@@ -2,7 +2,7 @@ import datetime
 from pymongo import MongoClient
 from bson import ObjectId
 
-from class_utils import Project, Network, Edge, User
+from class_utils import Project, Network, Edge, User, TimeRange
 
 class MongoWrapper:
     def __init__(self, mongo_host, db_name):
