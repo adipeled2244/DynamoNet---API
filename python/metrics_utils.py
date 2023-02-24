@@ -13,7 +13,7 @@ def getNodes(network):
 
 # Create a graph from the network
 def createGraph(network):
-    graph = ig.Graph(directed=True)
+    graph = ig.Graph(directed=False)
     if network.nodes is None:
         network.nodes = getNodes(network)
     graph.add_vertices([str(node) for node in network.nodes])
