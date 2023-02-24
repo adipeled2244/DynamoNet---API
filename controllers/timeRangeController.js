@@ -62,7 +62,7 @@ exports.timeRangeController = {
           "./python/create_time_ranges.py",
           `--project_id=${projectId}`,
           `--network_id=${networkId}`,
-          `--favorite_nodes=${favoriteNodes.favoriteNodes}`,
+          `--favorite_nodes=${JSON.stringify(favoriteNodes.favoriteNodes)}`,
           `--time_windows=${JSON.stringify(timeWindows)}`,
         ],
         (options = { detached: true })

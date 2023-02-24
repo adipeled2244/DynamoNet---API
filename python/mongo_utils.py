@@ -241,6 +241,10 @@ class MongoWrapper:
                         'bsonType': 'double',
                         'description': 'must be a double'
                     },
+                    "nodeMetrics": {
+                        'bsonType': 'object',
+                        'description': 'must be an object'
+                    },
                 }
             }
         }
@@ -260,13 +264,26 @@ class MongoWrapper:
             "diameter" : network.diameter,
             "radius" : network.radius,
             "reciprocity" : network.reciprocity,
-            "degreeCentrality" : network.degreeCentrality
+            "degreeCentrality" : network.degreeCentrality,
+            "nodeMetrics": network.nodeMetrics
         })
 
     def get_network_from_networks_collection_by_object_id(self, object_id):
         self.networks_collection_setup()
         networks_collection = self.get_collection('networks')
         return networks_collection.find_one({'_id': ObjectId(object_id)})
+
+    def update_node_in_network(self, network_id, node_id, node_metrics):
+        self.networks_collection_setup()
+        networks_collection = self.get_collection('networks')
+        return networks_collection.update_one({
+                                                '_id': ObjectId(network_id)
+                                                }, 
+                                                {
+                                                '$set': {
+                                                    f'nodeMetrics.{node_id}': node_metrics
+                                                    }
+                                                })
 
     def projects_collection_setup(self):
         project_validator = {
@@ -307,16 +324,23 @@ class MongoWrapper:
                     },
                     'timeRanges': {
                         'bsonType': 'array',
-                        'description': 'must be an array and is required',
+                        'description': 'must be an array',
                         'items': {
                             'bsonType': 'objectId',
                         }
                     },
                     'networks': {
                         'bsonType': 'array',
-                        'description': 'must be an array and is required',
+                        'description': 'must be an array',
                         'items': {
                             'bsonType': 'objectId',
+                        }
+                    },
+                    'favoriteNodes': {
+                        'bsonType': 'array',
+                        'description': 'must be an array',
+                        'items': {
+                            'bsonType': 'string',
                         }
                     }
                 }
@@ -468,19 +492,43 @@ def save_users(users, mongo_host, db_name):
     mongo.close()
     return users_response.inserted_ids
 
+def mongo_edges_to_network_edges(mongo_edges):
+    return [
+        Edge(
+            source=edge['source'], 
+            destination=edge['destination'], 
+            timestamp=edge['timestamp'], 
+            edgeContent=edge['edgeContent'], 
+            _id=edge['_id']
+            ) for edge in mongo_edges]
+
+def mongo_network_to_network(mongo_network, mongo):
+    network = Network(networkType=mongo_network['networkType'], _id=mongo_network['_id'])
+    network.edges = mongo.get_edges_from_edge_collection(mongo_network['edges'])
+    network.edges = [edge for edge in network.edges]
+    network.edges = mongo_edges_to_network_edges(network.edges)
+    if 'numberOfNodes' in mongo_network:
+        network.numberOfNodes = mongo_network['numberOfNodes']
+    if 'numberOfEdges' in mongo_network:
+        network.numberOfEdges = mongo_network['numberOfEdges']
+    if 'density' in mongo_network:
+        network.density = mongo_network['density']
+    if 'diameter' in mongo_network:
+        network.diameter = mongo_network['diameter']
+    if 'radius' in mongo_network:
+        network.radius = mongo_network['radius']
+    if 'reciprocity' in mongo_network:
+        network.reciprocity = mongo_network['reciprocity']
+    if 'degreeCentrality' in mongo_network:
+        network.degreeCentrality = mongo_network['degreeCentrality']
+    return network
+
+
 def create_time_range(network, start_date, end_date, mongo):
     edges_in_time_range_cursor = mongo.get_edges_from_edge_collection_in_range(network['edges'], start_date, end_date)
     time_range_edges = [edge for edge in edges_in_time_range_cursor]
     time_range_network = Network(networkType=network['networkType'])
-    time_range_network.edges = [
-        Edge (
-            source=edge['source'],
-            destination=edge['destination'],
-            timestamp=edge['timestamp'],
-            edgeContent=edge['edgeContent'],
-            _id=edge['_id']
-        )
-    for edge in time_range_edges]
+    time_range_network.edges = mongo_edges_to_network_edges(time_range_edges)
     time_range = TimeRange(
         startDate=start_date,
         endDate=end_date,
@@ -493,7 +541,7 @@ def save_time_range(time_range, project_id, mongo):
     time_range_object_id = mongo.save_time_range_to_timeRanges_collection(time_range, network_object_id.inserted_id)
     return mongo.insert_time_range_into_project(project_id, time_range_object_id.inserted_id)
 
-def create_multiple_time_ranges(project_id, network_id, time_windows, mongo_host, db_name):
+def create_multiple_time_ranges(project_id, network_id, time_windows, favorite_nodes, mongo_host, db_name):
     mongo = MongoWrapper(mongo_host, db_name)
     network = mongo.get_network_from_networks_collection_by_object_id(network_id)
     time_ranges = []
@@ -502,8 +550,26 @@ def create_multiple_time_ranges(project_id, network_id, time_windows, mongo_host
         end_date = time_window['end_date']
         time_range = create_time_range(network, start_date, end_date, mongo)
         metrics_utils.calculateNetworkMetrics(time_range.network)
+        for node_id in favorite_nodes:
+            node_metrics = metrics_utils.calculateNodeMetrics(time_range.network, node_id)
+            time_range.network.nodeMetrics[node_id] = node_metrics
         save_time_range(time_range, project_id, mongo)
         time_ranges.append(time_range)
     mongo.close()
     return time_ranges
-    
+
+def update_node_metrics_in_project(project_id, node_id, mongo_host, db_name):
+    mongo = MongoWrapper(mongo_host, 'test')
+    project = mongo.get_project_from_projects_collection_by_object_id(project_id)
+    if project is None:
+        mongo.close()
+        return
+    time_ranges = project['timeRanges']
+    for time_range_id in time_ranges:
+        time_range = mongo.get_time_range_from_timeRanges_collection_by_object_id(time_range_id)
+        network = mongo.get_network_from_networks_collection_by_object_id(time_range['network'])        
+        network = mongo_network_to_network(network, mongo)
+        node_metrics = metrics_utils.calculateNodeMetrics(network, node_id)
+        network.nodeMetrics[node_id] = node_metrics
+        mongo.update_node_in_network(network._id, node_id, node_metrics)
+    mongo.close()

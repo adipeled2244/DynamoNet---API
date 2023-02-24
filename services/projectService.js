@@ -36,22 +36,28 @@ async function getProjectByUserId(userId) {
   return await Project.find({ userRef: userId });
 }
 
-async function getProject(projectId) {
+async function getProject(projectId, populate = true) {
   logger.info(`[getProject] - ${path.basename(__filename)}`);
+  if (!populate) {
+    return await Project.findOne({ _id: projectId });
+  }
   return await Project.findOne({ _id: projectId }).populate(
     "networks timeRanges",
     "-edges"
   );
 }
 
-async function getProjects() {
+async function getProjects(populate = true) {
   logger.info(`[getProject] - ${path.basename(__filename)}`);
+  if (!populate) {
+    return await Project.find({});
+  }
   return await Project.find({}).populate("networks timeRanges", "-edges");
 }
 
 async function deleteProject(projectId) {
   logger.info(`[deleteProject] - ${path.basename(__filename)}`);
-  const project = await projectService.getProject(projectId);
+  const project = await getProject(projectId, false);
   if (!project) {
     throw Error(`Project id : ${projectId} not found`);
   }

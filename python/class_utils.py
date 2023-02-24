@@ -30,7 +30,7 @@ class Tweet:
         return f'Text: {self.text}'
 
 class Network:
-    def __init__(self, networkType):
+    def __init__(self, networkType, _id=None):
         self.networkType = networkType
         self.nodes = None
         self.edges = []
@@ -41,6 +41,8 @@ class Network:
         self.radius =None
         self.reciprocity = None
         self.degreeCentrality = None
+        self.nodeMetrics = {}
+        self._id = _id
 
 class Edge:
     def __init__(self, source, destination, timestamp, edgeContent, _id=None):
@@ -51,7 +53,7 @@ class Edge:
         self._id = _id
 
 class Project:
-    def __init__(self, title, description, dataset, startDate, endDate, edgeType, timeRanges, networks):
+    def __init__(self, title, description, dataset, startDate, endDate, edgeType, timeRanges, networks, favoriteNodes):
         self.createdDate = datetime.datetime.now(pytz.utc)
         self.title = title
         self.description = description
@@ -61,6 +63,7 @@ class Project:
         self.edgeType = edgeType
         self.timeRanges = timeRanges
         self.networks = networks
+        self.favoriteNodes = favoriteNodes
 
 class TimeRange:
     def __init__(self, startDate, endDate, network):

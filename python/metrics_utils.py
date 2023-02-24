@@ -48,7 +48,7 @@ def reciprocity(graph):
 # calculate the degree centrality of the graph using Freeman's formula
 def freemanDegreeCentrality(graph):
     degrees = graph.degree()
-    if len(degrees) == 0:
+    if len(degrees) == 0 or graph.vcount() <= 2:
         return np.NAN
     max_degree = max(degrees)
     degree_distances = [max_degree - degree for degree in degrees]
@@ -97,3 +97,18 @@ def calculateNetworkMetrics(network):
     network.radius = float(radius(graph))
     network.reciprocity = float(reciprocity(graph))
     network.degreeCentrality = float(freemanDegreeCentrality(graph))
+
+def calculateNodeMetrics(network, node):
+    graph = createGraph(network)
+    if node not in network.nodes:
+        return None
+    node_metrics = {
+        'degree': degree(graph, node),
+        'inDegree': inDegree(graph, node),
+        'outDegree': outDegree(graph, node),
+        'closenessCentrality': closenessCentrality(graph, node),
+        'betweennessCentrality': betweennessCentrality(graph, node),
+        'localClusteringCoefficient': localClusteringCoefficient(graph, node)
+
+    }
+    return node_metrics

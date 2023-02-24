@@ -13,7 +13,7 @@ def main(args):
         'end_date': datetime.datetime.strptime(time_window['endDate'], js_date_format)
     } for time_window in args.time_windows]
     # create time ranges
-    time_ranges = mongo_utils.create_multiple_time_ranges(args.project_id, args.network_id, args.time_windows, mongo_host, 'test')
+    time_ranges = mongo_utils.create_multiple_time_ranges(args.project_id, args.network_id, args.time_windows, args.favorite_nodes, mongo_host, 'test')
     pass
 
 if __name__ == '__main__':
