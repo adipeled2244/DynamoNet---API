@@ -54,12 +54,15 @@ exports.timeRangeController = {
     }
     try {
       const { projectId, networkId, timeWindows } = timeRangeParams;
+      const favoriteNodes = await projectService.getFavoriteNodes(projectId);
+
       const pythonProcess = spawn(
         "python",
         [
           "./python/create_time_ranges.py",
           `--project_id=${projectId}`,
           `--network_id=${networkId}`,
+          `--favorite_nodes=${favoriteNodes.favoriteNodes}`,
           `--time_windows=${JSON.stringify(timeWindows)}`,
         ],
         (options = { detached: true })

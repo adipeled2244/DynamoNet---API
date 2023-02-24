@@ -13,7 +13,6 @@ exports.authController = {
     // check if user exist
     try {
       const user = await userService.getUserByEmail(userParams.email);
-      console.log("adikaaaaaa")
       console.log(user)
       if (user) {
         res.status(400).json({ error: `User already exist` });

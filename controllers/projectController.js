@@ -137,4 +137,88 @@ exports.projectController = {
       return;
     }
   },
+
+  async addFavoriteNode(req, res) {
+    logger.info(`[addFavoriteNode] - ${path.basename(__filename)}`);
+    const projectIdParam = req.params.projectId;
+    const twitterIdParam = req.params.twitterId;
+    let addResult;
+    try {
+      const nodeAlreadyExist = await projectService.getFavoriteNode(projectIdParam, twitterIdParam);
+      if (!nodeAlreadyExist) {
+        addResult = await projectService.addFavoriteNode(projectIdParam, twitterIdParam)
+      }
+      else {
+        return res.status(404).json({ error: "twiiter id already exist in favoriteNodes array" });
+      }
+
+    } catch (err) {
+      res
+        .status(500)
+        .json({ error: `Error add new favorite node ${projectIdParam} , node: ${twitterIdParam}: ${err}` });
+      return;
+    }
+
+    const pythonProcess = spawn(
+      "python",
+      [
+        "./python/add_favorite.py",
+        `--project_id=${projectIdParam}`,
+        `--favorite_id=${twitterIdParam}`,
+      ],
+      (options = {
+        detached: true,
+      })
+    );
+    pythonProcess.unref();
+    pythonProcess.stdout.on("data", (data) => {
+      logger.info(`PYTHON import stdout: ${data}`);
+    });
+    pythonProcess.stderr.on("data", (data) => {
+      logger.error(`PYTHON import stderr: ${data}`);
+    });
+    pythonProcess.on("close", (data) => {
+      try {
+        logger.info(`PYTHON import close stdout: ${data}`);
+      } catch (err) {
+        logger.error(`PYTHON import close stderr: ${err}`);
+      }
+    });
+
+    if (addResult.matchedCount == 1) {
+      return res.status(200).json({ message: "favorite updated" });
+    } else {
+      return res.status(404).json({ error: "ProjectId or Favorite id not found" });
+    }
+  },
+
+  async removeFavoriteNode(req, res) {
+    logger.info(`[removeFavoriteNode] - ${path.basename(__filename)}`);
+    const projectIdParam = req.params.projectId;
+    const twitterIdParam = req.params.twitterId;
+    let deleteResultA = null;
+    let deletePromises = [];
+    try {
+
+      deletePromises.push(projectService.removeFavoriteNodeFromFavoriteNodes(projectIdParam, twitterIdParam));
+      deletePromises.push(projectService.removeFavoriteNodeFromTimeRangesNetwork(projectIdParam, twitterIdParam));
+
+      [deleteResultA] = await Promise.all(deletePromises);
+
+    } catch (err) {
+      res
+        .status(500)
+        .json({ error: `Error remove node ${projectIdParam} , node: ${twitterIdParam}: ${err}` });
+      return;
+    }
+
+    if (deleteResultA.matchedCount == 1) {
+      return res.status(200).json({ message: "favorite node remove" });
+    } else {
+      return res.status(404).json({ error: "ProjectId or twitterId not found" });
+    }
+  },
+
 };
+
+
