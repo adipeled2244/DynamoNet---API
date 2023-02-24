@@ -1,4 +1,5 @@
 import datetime
+import sys
 from pymongo import MongoClient
 from bson import ObjectId
 import metrics_utils
@@ -512,8 +513,14 @@ def insert_network_to_project(project_id, network_object_id, mongo_host, db_name
 
 def save_users(users, mongo_host, db_name):
     mongo = MongoWrapper(mongo_host, db_name)
-    users_response = mongo.save_users_to_node_collection(users)
-    mongo.close()
+    try:
+        users_response = mongo.save_users_to_node_collection(users)
+    except Exception as e:
+        print('This error occured while saving users to node collection: (skipping)', file=sys.stderr)
+        print(e, file=sys.stderr)
+        mongo.close()
+        return None
+    mongo.close()    
     return users_response.inserted_ids
 
 def mongo_edges_to_network_edges(mongo_edges):
