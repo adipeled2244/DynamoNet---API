@@ -57,7 +57,7 @@ exports.projectController = {
     logger.info(`[addProject] - ${path.basename(__filename)}`);
     const projectParams = req.body;
     const userId = projectParams.userId;
-
+    const userEmail = projectParams.userEmail;
     if (!projectParams) {
       res.status(400).send({ error: "invalid params" });
     }
@@ -67,7 +67,11 @@ exports.projectController = {
 
       const pythonProcess = spawn(
         "python",
-        ["./python/virtual_twitter.py", `--project_id=${newProject._id}`],
+        [
+          "./python/virtual_twitter.py",
+          `--project_id=${newProject._id}`,
+          `--user_email=${userEmail}`,
+        ],
         (options = {
           detached: true,
         })
