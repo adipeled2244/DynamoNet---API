@@ -127,7 +127,7 @@ class MongoWrapper:
 
     def save_users_to_node_collection(self, users):
         self.nodes_collection_setup()
-        nodes_collection = self.get_collection('node')
+        nodes_collection = self.get_collection('nodes')
         return nodes_collection.insert_many([{
             "twitterId" : str(user.id),
             "name" : user.name,
@@ -268,10 +268,34 @@ class MongoWrapper:
             "nodeMetrics": network.nodeMetrics
         })
 
+    def update_network_to_networks_collection(self, network_id, network):
+        self.networks_collection_setup()
+        networks_collection = self.get_collection('networks')
+        return networks_collection.update_one({
+                                                '_id': ObjectId(network_id)
+                                                }, 
+                                                {
+                                                '$set': {
+                                                    "numberOfNodes" : network.numberOfNodes,
+                                                    "numberOfEdges" : network.numberOfEdges,
+                                                    "density" : network.density,
+                                                    "diameter" : network.diameter,
+                                                    "radius" : network.radius,
+                                                    "reciprocity" : network.reciprocity,
+                                                    "degreeCentrality" : network.degreeCentrality,
+                                                    "nodeMetrics": network.nodeMetrics
+                                                }
+                                            })
+
     def get_network_from_networks_collection_by_object_id(self, object_id):
         self.networks_collection_setup()
         networks_collection = self.get_collection('networks')
         return networks_collection.find_one({'_id': ObjectId(object_id)})
+
+    def delete_networks_exclude_ids(self, ids):
+        self.networks_collection_setup()
+        networks_collection = self.get_collection('networks')
+        return networks_collection.delete_many({'_id': {'$nin': [ObjectId(id) for id in ids]}})
 
     def update_node_in_network(self, network_id, node_id, node_metrics):
         self.networks_collection_setup()
