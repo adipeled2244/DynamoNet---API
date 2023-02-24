@@ -13,6 +13,7 @@ const projectSchema = new Schema(
     edgeType: { type: String, required: true },
     timeRanges: [{ type: Schema.Types.ObjectId, ref: "TimeRange" }],
     networks: [{ type: Schema.Types.ObjectId, ref: "Network" }],
+    favoriteNodes: { type: [String], default:[] }
   },
   { collection: "projects" }
 );
