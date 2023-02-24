@@ -138,7 +138,7 @@ class MongoWrapper:
             "friendsCount" : user.friends_count,
             "statusesCount" : user.statuses_count,
             "registrationDateTwitter" : user.created_at
-        } for user in users])
+        } for user in users], ordered=False)
 
     def get_users_from_node_collection(self, users):
         self.nodes_collection_setup()
