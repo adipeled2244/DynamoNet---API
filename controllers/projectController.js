@@ -64,29 +64,26 @@ exports.projectController = {
     projectParams.createdDate = Date.now();
     try {
       const newProject = await projectService.addProject(projectParams);
-      console.log(newProject);
 
       const pythonProcess = spawn(
         "python",
-        ["./python/tester.py", `--project_id=${newProject._id}`],
+        ["./python/virtual_twitter.py", `--project_id=${newProject._id}`],
         (options = {
           detached: true,
         })
       );
-      // detach the child process from the parent in order to let it run in the background
       pythonProcess.unref();
       pythonProcess.stdout.on("data", (data) => {
-        console.log(`this is the data from noor`);
-        console.log(`${data}`);
+        logger.info(`PYTHON import stdout: ${data}`);
       });
       pythonProcess.stderr.on("data", (data) => {
-        console.error(`stderr: ${data}`);
+        logger.error(`PYTHON import stderr: ${data}`);
       });
       pythonProcess.on("close", (data) => {
         try {
-          console.log(`close: ${data}`);
+          logger.info(`PYTHON import close stdout: ${data}`);
         } catch (err) {
-          console.error(`close: ${err}`);
+          logger.error(`PYTHON import close stderr: ${err}`);
         }
       });
       // TODO: needs fixing - updateUser recieves user id and params object

@@ -10,6 +10,7 @@ from config import mongo_host
 from class_utils import Project, TimeRange, Network, User, Edge, TweepyWrapper, Tweet
 import mongo_utils
 from mongo_utils import MongoWrapper
+import metrics_utils
 
 def get_users(tweepyWrapper, screen_names):
     users = []
@@ -182,6 +183,9 @@ def import_data(project_id, limit=None, db_name='test'):
     # save source_users_dict to mongo
     mongo_utils.save_users(list(source_users_dict.values()), mongo_host=mongo_host, db_name=db_name)
 
+    # calculate network metrics
+    metrics_utils.calculateNetworkMetrics(retweetNetwork)
+
     # save retweetNetwork to mongo
     retweetNetwork_object_id = mongo_utils.save_network(retweetNetwork, mongo_host=mongo_host, db_name=db_name)
 
@@ -205,6 +209,9 @@ def import_data(project_id, limit=None, db_name='test'):
 
     # save missing_source_users_dict to mongo
     mongo_utils.save_users(list(missing_source_users_dict.values()), mongo_host=mongo_host, db_name=db_name)
+
+    # calculate network metrics
+    metrics_utils.calculateNetworkMetrics(quoteNetwork)
 
     # save quoteNetwork to mongo
     quoteNetwork_object_id = mongo_utils.save_network(quoteNetwork, mongo_host=mongo_host, db_name=db_name)

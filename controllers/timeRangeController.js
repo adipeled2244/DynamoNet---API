@@ -66,17 +66,16 @@ exports.timeRangeController = {
       );
       pythonProcess.unref();
       pythonProcess.stdout.on("data", (data) => {
-        console.log(`data in TR`);
-        console.log(`${data}`);
+        logger.info(`PYTHON TR stdout:${data}`);
       });
       pythonProcess.stderr.on("data", (data) => {
-        console.error(`stderr: ${data}`);
+        logger.error(`PYTHON TR stderr: ${data}`);
       });
       pythonProcess.on("close", (data) => {
         try {
-          console.log(`close: ${data}`);
+          logger.info(`PYTHON TR close stdout: ${data}`);
         } catch (err) {
-          console.error(`close: ${err}`);
+          logger.error(`PYTHON TR close stderr: ${err}`);
         }
       });
       res.status(200).json({ message: "Data processing " });

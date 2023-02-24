@@ -38,3 +38,5 @@ info:  POST |  /api/timeRanges  | Thu Feb 23 2023 19:26:44 GMT+0200
 info:  POST |  /api/timeRanges  | Thu Feb 23 2023 19:27:24 GMT+0200  
 info:  POST |  /api/timeRanges  | Thu Feb 23 2023 20:44:34 GMT+0200  
 info:  POST |  /api/timeRanges  | Thu Feb 23 2023 20:50:59 GMT+0200  
+info:  POST |  /api/projects  | Thu Feb 23 2023 21:20:02 GMT+0200  
+info:  POST |  /api/projects  | Thu Feb 23 2023 21:21:27 GMT+0200  
