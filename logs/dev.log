@@ -40,3 +40,11 @@ info:  POST |  /api/timeRanges  | Thu Feb 23 2023 20:44:34 GMT+0200
 info:  POST |  /api/timeRanges  | Thu Feb 23 2023 20:50:59 GMT+0200  
 info:  POST |  /api/projects  | Thu Feb 23 2023 21:20:02 GMT+0200  
 info:  POST |  /api/projects  | Thu Feb 23 2023 21:21:27 GMT+0200  
+info:  POST |  /api/timeRanges  | Fri Feb 24 2023 08:48:02 GMT+0200  
+info:  GET |  /api/projects  | Fri Feb 24 2023 09:04:40 GMT+0200  
+info:  GET |  /api/networks  | Fri Feb 24 2023 09:04:58 GMT+0200  
+info:  GET |  /api/networks/63f85dac4e1a8d719b5838c8  | Fri Feb 24 2023 09:05:48 GMT+0200  
+info:  GET |  /api/timeRanges  | Fri Feb 24 2023 09:10:38 GMT+0200  
+info:  GET |  /api/projects  | Fri Feb 24 2023 09:10:47 GMT+0200  
+info:  GET |  /api/timeRanges  | Fri Feb 24 2023 09:12:38 GMT+0200  
+info:  GET |  /api/timeRanges  | Fri Feb 24 2023 09:12:54 GMT+0200  
