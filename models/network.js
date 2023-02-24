@@ -12,6 +12,7 @@ const networkSchema = new Schema(
     reciprocity: { type: Number },
     periphery: { type: Number },
     clustetingCoefficient: { type: Number },
+    nodeMetrics: { type: Map, of: Object },
   },
   { collection: "networks" }
 );
