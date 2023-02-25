@@ -4,6 +4,7 @@ const path = require("path");
 const { spawn } = require("child_process");
 const { isErrored } = require("stream");
 const userService = require("../services/userService");
+const ObjectId = require("mongoose").Types.ObjectId;
 
 exports.projectController = {
   async getProject(req, res) {
@@ -91,9 +92,9 @@ exports.projectController = {
           logger.error(`PYTHON import close stderr: ${err}`);
         }
       });
-      // TODO: needs fixing - updateUser recieves user id and params object
+      // TODO: needs fixing - updateUser recieves user id and params object:change this id to currentUserId when we will do autheniccation
       //add projectRef to user projects
-      const updateUserRes = await userService.updateUser(newProject._id);
+      const updateUserRes = await userService.updateUser(ObjectId("63f54084512dd78a25a3646a"),newProject._id);
 
       res.status(200).json({ project: newProject });
     } catch (err) {
