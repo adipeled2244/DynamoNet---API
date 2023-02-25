@@ -180,9 +180,9 @@ class MongoWrapper:
         edges_collection = self.get_collection('edges')
         return edges_collection.insert_many([{
             # if edge.source is User object, get its id else get its twitterId
-            "source" : str(edge.source.id) if hasattr(edge.source, 'id') else edge.source,
+            "source" : str(edge.source),
             # if edge.destination is User object, get its id else get its twitterId
-            "destination" : str(edge.destination.id) if hasattr(edge.destination, 'id') else edge.destination,
+            "destination" : str(edge.destination),
             "edgeContent" : edge.edgeContent,
             "timestamp" : edge.timestamp
         } for edge in edges])
@@ -516,8 +516,8 @@ def save_users(users, mongo_host, db_name):
     try:
         users_response = mongo.save_users_to_node_collection(users)
     except Exception as e:
-        print('This error occured while saving users to node collection: (skipping)', file=sys.stderr)
-        print(e, file=sys.stderr)
+        print('error occured while saving users to node collection: (skipping most likely duplicate)', file=sys.stderr)
+        # print(e, file=sys.stderr)
         mongo.close()
         return None
     mongo.close()    
