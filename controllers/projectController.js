@@ -144,18 +144,26 @@ exports.projectController = {
     const twitterIdParam = req.params.twitterId;
     let addResult;
     try {
-      const nodeAlreadyExist = await projectService.getFavoriteNode(projectIdParam, twitterIdParam);
+      const nodeAlreadyExist = await projectService.getFavoriteNode(
+        projectIdParam,
+        twitterIdParam
+      );
       if (!nodeAlreadyExist) {
-        addResult = await projectService.addFavoriteNode(projectIdParam, twitterIdParam)
+        addResult = await projectService.addFavoriteNode(
+          projectIdParam,
+          twitterIdParam
+        );
+      } else {
+        return res
+          .status(404)
+          .json({ error: "twiiter id already exist in favoriteNodes array" });
       }
-      else {
-        return res.status(404).json({ error: "twiiter id already exist in favoriteNodes array" });
-      }
-
     } catch (err) {
       res
         .status(500)
-        .json({ error: `Error add new favorite node ${projectIdParam} , node: ${twitterIdParam}: ${err}` });
+        .json({
+          error: `Error add new favorite node ${projectIdParam} , node: ${twitterIdParam}: ${err}`,
+        });
       return;
     }
 
@@ -188,7 +196,9 @@ exports.projectController = {
     if (addResult.matchedCount == 1) {
       return res.status(200).json({ message: "favorite updated" });
     } else {
-      return res.status(404).json({ error: "ProjectId or Favorite id not found" });
+      return res
+        .status(404)
+        .json({ error: "ProjectId or Favorite id not found" });
     }
   },
 
@@ -199,26 +209,35 @@ exports.projectController = {
     let deleteResultA = null;
     let deletePromises = [];
     try {
-
-      deletePromises.push(projectService.removeFavoriteNodeFromFavoriteNodes(projectIdParam, twitterIdParam));
-      deletePromises.push(projectService.removeFavoriteNodeFromTimeRangesNetwork(projectIdParam, twitterIdParam));
+      deletePromises.push(
+        projectService.removeFavoriteNodeFromFavoriteNodes(
+          projectIdParam,
+          twitterIdParam
+        )
+      );
+      deletePromises.push(
+        projectService.removeFavoriteNodeFromTimeRangesNetwork(
+          projectIdParam,
+          twitterIdParam
+        )
+      );
 
       [deleteResultA] = await Promise.all(deletePromises);
-
     } catch (err) {
       res
         .status(500)
-        .json({ error: `Error remove node ${projectIdParam} , node: ${twitterIdParam}: ${err}` });
+        .json({
+          error: `Error remove node ${projectIdParam} , node: ${twitterIdParam}: ${err}`,
+        });
       return;
     }
 
     if (deleteResultA.matchedCount == 1) {
       return res.status(200).json({ message: "favorite node remove" });
     } else {
-      return res.status(404).json({ error: "ProjectId or twitterId not found" });
+      return res
+        .status(404)
+        .json({ error: "ProjectId or twitterId not found" });
     }
   },
-
 };
-
-
