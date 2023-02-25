@@ -31,6 +31,7 @@ exports.projectController = {
     try {
       projects = await projectService.getProjects();
       res.status(200).json({ projects });
+      return;
     } catch (err) {
       res.status(500).json({ error: `Error get projects : ${err}` });
       return;
@@ -128,7 +129,7 @@ exports.projectController = {
     const projectIdParam = req.params.projectId;
     let deleteResult;
     try {
-      deleteResult = await projectService.deleteProject(projectIdParam);
+      //deleteResult = await projectService.deleteProject(projectIdParam);
       return res.status(200).json({ message: `Project deleted` });
     } catch (err) {
       res
