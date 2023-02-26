@@ -29,8 +29,6 @@ async function updateUser(id,params){
 
 async function addProjectToUser(id,params){
     logger.info(`[addProjectToUser] - ${path.basename(__filename)}`);
-    console.log(ObjectId(id))
-    console.log(ObjectId(params))
     return await User.updateOne({ _id: id }, { $push: { projectsRefs: ObjectId(params) } });
 }
 
