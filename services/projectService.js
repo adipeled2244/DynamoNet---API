@@ -42,7 +42,7 @@ async function getProject(projectId, populate = true) {
     return await Project.findOne({ _id: projectId });
   }
   return await Project.findOne({ _id: projectId }).populate(
-    "networks timeRanges",
+    "network timeRanges",
     "-edges"
   );
 }
@@ -62,7 +62,7 @@ async function deleteProject(projectId) {
     throw Error(`Project id : ${projectId} not found`);
   }
   await timeRangeService.deleteTimeRanges(project.timeRanges, projectId);
-  await networkService.deleteNetworks(project.networks);
+  await networkService.deleteNetwork(project.network);
   return await Project.deleteOne({ _id: projectId });
 }
 

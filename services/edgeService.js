@@ -7,7 +7,8 @@ module.exports={
     updateEdge,
     getEdge,
     deleteEdge,
-    getEdges
+    getEdges,
+    getNetworkEdgesByType
 }
 async function addEdge(params){
     logger.info(`[addEdge] - ${path.basename(__filename)}`);
@@ -34,3 +35,4 @@ async function deleteEdge(edgeId){
     logger.info(`[deleteEdge] - ${path.basename(__filename)}`);
     return await Edge.deleteOne({_id: edgeId});
 }
+

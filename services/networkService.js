@@ -9,7 +9,7 @@ module.exports = {
   updateNetwork,
   getNetwork,
   getNetworks,
-  deleteNetworks,
+  deleteNetwork,
 };
 async function addNetwork(params) {
   logger.info(`[addNetwork] - ${path.basename(__filename)}`);
@@ -38,9 +38,8 @@ async function getNetworks() {
   return await Network.find({}).populate("edges");
 }
 
-async function deleteNetworks(networkIds) {
-  logger.info(`[deleteNetworks] - ${path.basename(__filename)}`);
-  networkIds.forEach(async (networkId) => {
+async function deleteNetwork(networkId) {
+  logger.info(`[deleteNetwork] - ${path.basename(__filename)}`);
     const network = await getNetwork(networkId);
     if (!network) {
       throw Error(`Network id : ${networkId} not found`);
@@ -48,5 +47,6 @@ async function deleteNetworks(networkIds) {
     const networkEdges = network.edges;
     await Edge.deleteMany({ _id: { $in: networkEdges } });
     await Network.deleteOne({ _id: networkId });
-  });
 }
+
+

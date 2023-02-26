@@ -6,6 +6,7 @@ const edgeSchema = new Schema(
     destination: { type: String, required: true },
     edgeContent: { type: String, required: true },
     timestamp: { type: Date },
+    edgeType:{type: String, required: true}
   },
   { collection: "edges" }
 );

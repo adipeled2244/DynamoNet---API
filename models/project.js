@@ -10,9 +10,8 @@ const projectSchema = new Schema(
     dataset: { type: [String], required: true },
     startDate: { type: Date, required: true },
     endDate: { type: Date, required: true },
-    edgeType: { type: String, required: true },
     timeRanges: [{ type: Schema.Types.ObjectId, ref: "TimeRange" }],
-    networks: [{ type: Schema.Types.ObjectId, ref: "Network" }],
+    sourceNetwork: { type: Schema.Types.ObjectId, ref: "Network" },
     favoriteNodes: { type: [String], default: [] },
   },
   { collection: "projects" }

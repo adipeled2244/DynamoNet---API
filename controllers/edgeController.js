@@ -34,8 +34,7 @@ exports.edgeController = {
         }
     },
 
-    //TO DO: Change according to noor
-    async addEdge(req, res) {
+\    async addEdge(req, res) {
         logger.info(`[addEdge] - ${path.basename(__filename)}`);
         const edgeParams = req.body;
         try {
