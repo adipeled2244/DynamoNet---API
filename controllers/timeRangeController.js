@@ -109,4 +109,25 @@ exports.timeRangeController = {
       return;
     }
   },
+  async deleteTimeRanges(req, res) {
+    logger.info(`[deleteTimeRanges] - ${path.basename(__filename)}`);
+    const projectId = req.body.projectId;
+    const timeRanges = req.body.timeRanges;
+    if (!timeRanges || !projectId) {
+      res.status(400).send({ error: "invalid params" });
+    }
+    let deleteResult;
+    try {
+      deleteResult = await timeRangeService.deleteTimeRanges(
+        timeRanges,
+        projectId
+      );
+      return res.status(200).json({ message: `Time Ranges deleted` });
+    } catch (err) {
+      res.status(500).json({
+        error: `Error deleting time ranges for project ${projectId} : ${err}`,
+      });
+      return;
+    }
+  },
 };

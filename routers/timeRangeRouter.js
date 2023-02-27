@@ -9,5 +9,6 @@ timeRangeRouter.delete(
   "/:timeRangeId/projects/:projectId",
   timeRangeController.deleteTimeRange
 );
+timeRangeRouter.delete("/", timeRangeController.deleteTimeRanges);
 
 module.exports = { timeRangeRouter };

@@ -3,6 +3,7 @@ import sys
 from pymongo import MongoClient
 from bson import ObjectId
 import metrics_utils
+import constants
 
 from class_utils import Project, Network, Edge, User, TimeRange
 
@@ -354,7 +355,11 @@ class MongoWrapper:
                         'items': {
                             'bsonType': 'string',
                         }
-                    }
+                    },
+                    'status': {
+                        'bsonType': 'string',
+                        'description': 'must be a string',
+                    },
                 }
             }
         }
@@ -379,7 +384,8 @@ class MongoWrapper:
             "edgeType" : project.edgeType,
             "timeRanges" : [ ObjectId(time_range_id) for time_range_id in time_ranges_object_ids ],
             "sourceNetwork" : ObjectId(network_object_id) if network_object_id is not None else None,
-            "favoriteNodes" : project.favoriteNodes
+            "favoriteNodes" : project.favoriteNodes,
+            "status" : project.status
         })
 
     def get_project_from_projects_collection_by_object_id(self, object_id):
@@ -401,7 +407,12 @@ class MongoWrapper:
     def insert_network_into_project(self, project_id, network_object_id):
         self.projects_collection_setup()
         projects_collection = self.get_collection('projects')
-        return projects_collection.update_one({'_id': ObjectId(project_id)}, {'$set': {'sourceNetwork': ObjectId(network_object_id)}})
+        return projects_collection.update_one({'_id': ObjectId(project_id)}, {'$set': {'sourceNetwork': ObjectId(network_object_id), 'status': constants.project_ready}})
+    
+    def update_project_status(self, project_id, status):
+        self.projects_collection_setup()
+        projects_collection = self.get_collection('projects')
+        return projects_collection.update_one({'_id': ObjectId(project_id)}, {'$set': {'status': status}})
     
     def insert_time_range_into_project(self, project_id, time_range_object_id):
         self.projects_collection_setup()
@@ -430,7 +441,11 @@ class MongoWrapper:
                     'network': {
                         'bsonType': 'objectId',
                         'description': 'must be an objectId and is required',
-                    }
+                    },
+                    'title': {
+                        'bsonType': 'string',
+                        'description': 'must be a string',
+                    },
                 }
             }
         }
@@ -446,7 +461,8 @@ class MongoWrapper:
         return timeRanges_collection.insert_one({
             "startDate" : time_range.startDate,
             "endDate" : time_range.endDate,
-            "network" : ObjectId(network_object_id)
+            "network" : ObjectId(network_object_id),
+            "title" : time_range.title
         })
 
     def get_time_range_from_timeRanges_collection_by_object_id(self, object_id):
@@ -489,6 +505,8 @@ def insert_network_to_project(project_id, network_object_id, mongo_host, db_name
     mongo = MongoWrapper(mongo_host, db_name)
     mongo.insert_network_into_project(project_id, network_object_id)
     mongo.close()
+
+
 
 def save_users(users, mongo_host, db_name):
     mongo = MongoWrapper(mongo_host, db_name)
@@ -548,8 +566,10 @@ def save_time_range(time_range, project_id, mongo):
 
 def create_multiple_time_ranges(project_id, network_id, edgeType, time_windows, favorite_nodes, mongo_host, db_name):
     mongo = MongoWrapper(mongo_host, db_name)
+    mongo.update_project_status(project_id, constants.project_creating_time_ranges)
     network = mongo.get_network_from_networks_collection_by_object_id(network_id)
     time_ranges = []
+    index = 0
     for time_window in time_windows:
         start_date = time_window['start_date']
         end_date = time_window['end_date']
@@ -564,13 +584,17 @@ def create_multiple_time_ranges(project_id, network_id, edgeType, time_windows, 
             node_metrics = metrics_utils.calculateNodeMetrics(time_range.network, node_id)
             time_range.network.nodeMetrics[node_id] = node_metrics
         print('saving time range')
+        time_range.title = 'time range {}'.format(index)
+        index += 1
         save_time_range(time_range, project_id, mongo)
         time_ranges.append(time_range)
+    mongo.update_project_status(project_id, constants.project_ready)
     mongo.close()
     return time_ranges
 
 def update_node_metrics_in_project(project_id, node_id, mongo_host, db_name):
     mongo = MongoWrapper(mongo_host, 'test')
+    mongo.update_project_status(project_id, constants.project_calculating_node_metrics)
     project = mongo.get_project_from_projects_collection_by_object_id(project_id)
     if project is None:
         mongo.close()
@@ -583,4 +607,5 @@ def update_node_metrics_in_project(project_id, node_id, mongo_host, db_name):
         node_metrics = metrics_utils.calculateNodeMetrics(network, node_id)
         network.nodeMetrics[node_id] = node_metrics
         mongo.update_node_in_network(network._id, node_id, node_metrics)
+    mongo.update_project_status(project_id, constants.project_ready)
     mongo.close()

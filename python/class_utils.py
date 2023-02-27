@@ -3,7 +3,8 @@ import json
 import datetime
 import pytz
 
-# set up classes to save data
+import constants
+
 class User:
     def __init__(self, id, name, screen_name, location, description, followers_count, friends_count, statuses_count, created_at):
         self.id = id
@@ -74,7 +75,7 @@ class Edge:
         self._id = _id
 
 class Project:
-    def __init__(self, title, description, dataset, startDate, endDate, edgeType, timeRanges, sourceNetwork, favoriteNodes):
+    def __init__(self, title, description, dataset, startDate, endDate, edgeType, timeRanges, sourceNetwork, favoriteNodes, status=constants.project_inprogress):
         self.createdDate = datetime.datetime.now(pytz.utc)
         self.title = title
         self.description = description
@@ -85,12 +86,14 @@ class Project:
         self.timeRanges = timeRanges
         self.sourceNetwork = sourceNetwork
         self.favoriteNodes = favoriteNodes
+        self.status = status
 
 class TimeRange:
-    def __init__(self, startDate, endDate, network):
+    def __init__(self, startDate, endDate, network, title=None):
         self.startDate = startDate
         self.endDate = endDate
         self.network = network
+        self.title = title
 
 # Tweepy Wrapper
 class TweepyWrapper:

@@ -18,6 +18,7 @@ const projectSchema = new Schema(
     },
     sourceNetwork: { type: Schema.Types.ObjectId, ref: "Network" },
     favoriteNodes: { type: [String], default: [] },
+    status: { type: String, default: "in progress" },
   },
   { collection: "projects" }
 );
