@@ -2,17 +2,12 @@ const { Schema, model } = require("mongoose");
 
 const networkSchema = new Schema(
   {
-    edges: [{ type: Schema.Types.ObjectId, ref: "Edge" }],
-    networkType: { type: String, required: true },
-    numberOfNodes: { type: Number },
-    numberOfEdges: { type: Number },
-    density: { type: Number },
-    diameter: { type: Number },
-    radius: { type: Number },
-    reciprocity: { type: Number },
-    periphery: { type: Number },
-    clustetingCoefficient: { type: Number },
+    networkMetrics: { type: Map, of: Object },
+    retweetNetworkMetrics: { type: Map, of: Object },
+    quoteNetworkMetrics: { type: Map, of: Object },
     nodeMetrics: { type: Map, of: Object },
+    nodes: { type: [String], required: true },
+    edges: [{ type: Schema.Types.ObjectId, ref: "Edge" }],
   },
   { collection: "networks" }
 );

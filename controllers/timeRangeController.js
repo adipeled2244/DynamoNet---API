@@ -41,7 +41,7 @@ exports.timeRangeController = {
    *
    * @param {*} req
    * @param {*} res
-   * @param {*} req.body { projectId, networkId, timeWindows }
+   * @param {*} req.body { projectId, networkId, edgeType, timeWindows }
    * @param {*} req.body.timeWindows [{'startDate': Date, 'endDate': Date},...]
    * @returns
    */
@@ -53,7 +53,7 @@ exports.timeRangeController = {
       res.status(400).send({ error: "invalid params" });
     }
     try {
-      const { projectId, networkId, timeWindows } = timeRangeParams;
+      const { projectId, networkId, edgeType, timeWindows } = timeRangeParams;
       const favoriteNodes = await projectService.getFavoriteNodes(projectId);
 
       const pythonProcess = spawn(
@@ -63,6 +63,7 @@ exports.timeRangeController = {
           `--project_id=${projectId}`,
           `--network_id=${networkId}`,
           `--favorite_nodes=${JSON.stringify(favoriteNodes.favoriteNodes)}`,
+          `--edge_type=${edgeType}`,
           `--time_windows=${JSON.stringify(timeWindows)}`,
         ],
         (options = { detached: true })

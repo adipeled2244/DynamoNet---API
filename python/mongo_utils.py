@@ -141,16 +141,21 @@ class MongoWrapper:
             "registrationDateTwitter" : user.created_at
         } for user in users], ordered=False)
 
-    def get_users_from_node_collection(self, users):
+    def get_users_from_node_collection_by_id(self, users):
         self.nodes_collection_setup()
         nodes_collection = self.get_collection('nodes')
         return nodes_collection.find({'twitterId': {'$in': [str(user.id) for user in users]}})
+    
+    def get_users_from_node_collection_by_screen_name(self, users):
+        self.nodes_collection_setup()
+        nodes_collection = self.get_collection('nodes')
+        return nodes_collection.find({'screenName': {'$in': [str(user.screen_name) for user in users]}})
 
     def edges_collection_setup(self):
         edge_validator = {
             '$jsonSchema': {
                 'bsonType': 'object',
-                'required': ['source', 'destination', 'edgeContent', 'timestamp'],
+                'required': ['source', 'destination', 'edgeContent', 'timestamp', 'edgeType'],
                 'properties': {
                     'source': {
                         'bsonType': 'string',
@@ -168,6 +173,10 @@ class MongoWrapper:
                         'bsonType': 'date',
                         'description': 'must be a date and is required'
                     },
+                    'edgeType': {
+                        'bsonType': 'string',
+                        'description': 'must be a string and is required'
+                    }
                 }
             }
         }
@@ -179,33 +188,54 @@ class MongoWrapper:
         self.edges_collection_setup()
         edges_collection = self.get_collection('edges')
         return edges_collection.insert_many([{
-            # if edge.source is User object, get its id else get its twitterId
             "source" : str(edge.source),
-            # if edge.destination is User object, get its id else get its twitterId
             "destination" : str(edge.destination),
             "edgeContent" : edge.edgeContent,
-            "timestamp" : edge.timestamp
+            "timestamp" : edge.timestamp,
+            "edgeType" : edge.edgeType
         } for edge in edges])
 
-    def get_edges_from_edge_collection(self, edges):
+    def get_edges_from_edge_collection(self, edge_ids):
         self.edges_collection_setup()
         edges_collection = self.get_collection('edges')
-        return edges_collection.find({'_id': {'$in': [ObjectId(edge) for edge in edges]}})
+        return edges_collection.find({'_id': {'$in': [ObjectId(edge) for edge in edge_ids]}})
 
-    def get_edges_from_edge_collection_in_range(self, edges, start_date, end_date):
+    def get_edges_from_edge_collection_in_range(self, edge_ids, start_date, end_date):
         self.edges_collection_setup()
         edges_collection = self.get_collection('edges')
-        return edges_collection.find({'_id': {'$in': [ObjectId(edge) for edge in edges]}, 'timestamp': {'$gte': start_date, '$lte': end_date}})
+        return edges_collection.find({'_id': {'$in': [ObjectId(edge) for edge in edge_ids]}, 'timestamp': {'$gte': start_date, '$lte': end_date}})
         
+    def get_edges_from_edge_collection_in_range_with_edgeType(self, edge_ids, start_date, end_date, edgeType):
+        self.edges_collection_setup()
+        edges_collection = self.get_collection('edges')
+        return edges_collection.find({'_id': {'$in': [ObjectId(edge) for edge in edge_ids]}, 'timestamp': {'$gte': start_date, '$lte': end_date}, 'edgeType': edgeType})
+     
+
     def networks_collection_setup(self):
         network_validator = {
             '$jsonSchema': {
                 'bsonType': 'object',
-                'required': ['networkType', 'edges'],
+                'required': ['edges'],
                 'properties': {
-                    'networkType': {
-                        'bsonType': 'string',
-                        'description': 'must be a string and is required',
+                    "networkMetrics": {
+                        'bsonType': 'object',
+                        'description': 'must be an object'
+                    },
+                    "retweetNetworkMetrics": {
+                        'bsonType': 'object',
+                        'description': 'must be an object'
+                    },
+                    "quoteNetworkMetrics": {
+                        'bsonType': 'object',
+                        'description': 'must be an object'
+                    },
+                    "nodeMetrics": {
+                        'bsonType': 'object',
+                        'description': 'must be an object'
+                    },
+                    'nodes': {
+                        'bsonType': 'array',
+                        'description': 'must be an array and is required',
                     },
                     'edges': {
                         'bsonType': 'array',
@@ -213,38 +243,6 @@ class MongoWrapper:
                         'items': {
                             'bsonType': 'objectId',
                         }
-                    },
-                    "numberOfNodes": {
-                        'bsonType': 'int',
-                        'description': 'must be an integer'
-                    },
-                    "numberOfEdges": {
-                        'bsonType': 'int',
-                        'description': 'must be an integer'
-                    },
-                    "density": {
-                        'bsonType': 'double',
-                        'description': 'must be a double'
-                    },
-                    "diameter": {
-                        'bsonType': 'double',
-                        'description': 'must be an integer'
-                    },
-                    "radius": {
-                        'bsonType': 'double',
-                        'description': 'must be an integer'
-                    },
-                    "reciprocity": {
-                        'bsonType': 'double',
-                        'description': 'must be a double'
-                    },
-                    "degreeCentrality": {
-                        'bsonType': 'double',
-                        'description': 'must be a double'
-                    },
-                    "nodeMetrics": {
-                        'bsonType': 'object',
-                        'description': 'must be an object'
                     },
                 }
             }
@@ -257,16 +255,12 @@ class MongoWrapper:
         self.networks_collection_setup()
         networks_collection = self.get_collection('networks')
         return networks_collection.insert_one({
-            "networkType" : network.networkType,
-            "edges" : [ ObjectId(edge_id) for edge_id in edges_object_ids ],
-            "numberOfNodes" : network.numberOfNodes,
-            "numberOfEdges" : network.numberOfEdges,
-            "density" : network.density,
-            "diameter" : network.diameter,
-            "radius" : network.radius,
-            "reciprocity" : network.reciprocity,
-            "degreeCentrality" : network.degreeCentrality,
-            "nodeMetrics": network.nodeMetrics
+            "networkMetrics" : network.networkMetrics,
+            "retweetNetworkMetrics" : network.retweetNetworkMetrics,
+            "quoteNetworkMetrics" : network.quoteNetworkMetrics,
+            "nodeMetrics" : network.nodeMetrics,
+            "nodes" : [ str(node) for node in network.nodes ],
+            "edges" : [ ObjectId(edge_id) for edge_id in edges_object_ids ]
         })
 
     def update_network_to_networks_collection(self, network_id, network):
@@ -277,14 +271,10 @@ class MongoWrapper:
                                                 }, 
                                                 {
                                                 '$set': {
-                                                    "numberOfNodes" : network.numberOfNodes,
-                                                    "numberOfEdges" : network.numberOfEdges,
-                                                    "density" : network.density,
-                                                    "diameter" : network.diameter,
-                                                    "radius" : network.radius,
-                                                    "reciprocity" : network.reciprocity,
-                                                    "degreeCentrality" : network.degreeCentrality,
-                                                    "nodeMetrics": network.nodeMetrics
+                                                    "networkMetrics" : network.networkMetrics,
+                                                    "retweetNetworkMetrics" : network.retweetNetworkMetrics,
+                                                    "quoteNetworkMetrics" : network.quoteNetworkMetrics,
+                                                    "nodeMetrics" : network.nodeMetrics,
                                                 }
                                             })
 
@@ -354,12 +344,9 @@ class MongoWrapper:
                             'bsonType': 'objectId',
                         }
                     },
-                    'networks': {
-                        'bsonType': 'array',
-                        'description': 'must be an array',
-                        'items': {
-                            'bsonType': 'objectId',
-                        }
+                    'sourceNetwork': {
+                        'bsonType': 'objectId',
+                        'description': 'must be an objectId',
                     },
                     'favoriteNodes': {
                         'bsonType': 'array',
@@ -377,11 +364,9 @@ class MongoWrapper:
             projects_collection = self.get_collection('projects')
             projects_collection.create_index('createdDate')
 
-    def save_project_to_projects_collection(self, project, time_ranges_object_ids=None, networks_object_ids=None):
+    def save_project_to_projects_collection(self, project, time_ranges_object_ids=None, network_object_id=None):
         if time_ranges_object_ids is None:
             time_ranges_object_ids = []
-        if networks_object_ids is None:
-            networks_object_ids = []
         self.projects_collection_setup()
         projects_collection = self.get_collection('projects')
         return projects_collection.insert_one({
@@ -393,7 +378,8 @@ class MongoWrapper:
             "endDate" : project.endDate,
             "edgeType" : project.edgeType,
             "timeRanges" : [ ObjectId(time_range_id) for time_range_id in time_ranges_object_ids ],
-            "networks" : [ ObjectId(network_id) for network_id in networks_object_ids ]
+            "sourceNetwork" : ObjectId(network_object_id) if network_object_id is not None else None,
+            "favoriteNodes" : project.favoriteNodes
         })
 
     def get_project_from_projects_collection_by_object_id(self, object_id):
@@ -415,13 +401,8 @@ class MongoWrapper:
     def insert_network_into_project(self, project_id, network_object_id):
         self.projects_collection_setup()
         projects_collection = self.get_collection('projects')
-        return projects_collection.update_one({'_id': ObjectId(project_id)}, {'$push': {'networks': ObjectId(network_object_id)}})
-
-    def insert_networks_into_project(self, project_id, networks_object_ids):
-        self.projects_collection_setup()
-        projects_collection = self.get_collection('projects')
-        return projects_collection.update_one({'_id': ObjectId(project_id)}, {'$push': {'networks': {'$each': [ObjectId(network_id) for network_id in networks_object_ids]}}})
-
+        return projects_collection.update_one({'_id': ObjectId(project_id)}, {'$set': {'sourceNetwork': ObjectId(network_object_id)}})
+    
     def insert_time_range_into_project(self, project_id, time_range_object_id):
         self.projects_collection_setup()
         projects_collection = self.get_collection('projects')
@@ -488,8 +469,6 @@ def get_project(project_id, mongo_host, db_name):
     project = mongo.get_project_from_projects_collection_by_object_id(project_id)
     if project is None:
         return None
-    # project['timeRanges'] = [mongo.get_time_range_from_timeRanges_collection_by_object_id(time_range_id) for time_range_id in project['timeRanges']]
-    # project['networks'] = [mongo.get_network_from_networks_collection_by_object_id(network_id) for network_id in project['networks']]
     mongo.close()
     return project
 
@@ -530,35 +509,30 @@ def mongo_edges_to_network_edges(mongo_edges):
             destination=edge['destination'], 
             timestamp=edge['timestamp'], 
             edgeContent=edge['edgeContent'], 
+            edgeType=edge['edgeType'] if 'edgeType' in edge else None,
             _id=edge['_id']
             ) for edge in mongo_edges]
 
 def mongo_network_to_network(mongo_network, mongo):
-    network = Network(networkType=mongo_network['networkType'], _id=mongo_network['_id'])
+    network = Network(_id=mongo_network['_id'])
     network.edges = mongo.get_edges_from_edge_collection(mongo_network['edges'])
     network.edges = [edge for edge in network.edges]
     network.edges = mongo_edges_to_network_edges(network.edges)
-    if 'numberOfNodes' in mongo_network:
-        network.numberOfNodes = mongo_network['numberOfNodes']
-    if 'numberOfEdges' in mongo_network:
-        network.numberOfEdges = mongo_network['numberOfEdges']
-    if 'density' in mongo_network:
-        network.density = mongo_network['density']
-    if 'diameter' in mongo_network:
-        network.diameter = mongo_network['diameter']
-    if 'radius' in mongo_network:
-        network.radius = mongo_network['radius']
-    if 'reciprocity' in mongo_network:
-        network.reciprocity = mongo_network['reciprocity']
-    if 'degreeCentrality' in mongo_network:
-        network.degreeCentrality = mongo_network['degreeCentrality']
+    if 'networkMetrics' in mongo_network:
+        network.networkMetrics = mongo_network['networkMetrics']
+    if 'retweetNetworkMetrics' in mongo_network:
+        network.retweetNetworkMetrics = mongo_network['retweetNetworkMetrics']
+    if 'quoteNetworkMetrics' in mongo_network:
+        network.quoteNetworkMetrics = mongo_network['quoteNetworkMetrics']
+    if 'nodeMetrics' in mongo_network:
+        network.nodeMetrics = mongo_network['nodeMetrics']
     return network
 
 
-def create_time_range(network, start_date, end_date, mongo):
-    edges_in_time_range_cursor = mongo.get_edges_from_edge_collection_in_range(network['edges'], start_date, end_date)
+def create_time_range(network, start_date, end_date, edgeType, mongo):
+    edges_in_time_range_cursor = mongo.get_edges_from_edge_collection_in_range_with_edgeType(network['edges'], start_date, end_date, edgeType)
     time_range_edges = [edge for edge in edges_in_time_range_cursor]
-    time_range_network = Network(networkType=network['networkType'])
+    time_range_network = Network()
     time_range_network.edges = mongo_edges_to_network_edges(time_range_edges)
     time_range = TimeRange(
         startDate=start_date,
@@ -572,15 +546,16 @@ def save_time_range(time_range, project_id, mongo):
     time_range_object_id = mongo.save_time_range_to_timeRanges_collection(time_range, network_object_id.inserted_id)
     return mongo.insert_time_range_into_project(project_id, time_range_object_id.inserted_id)
 
-def create_multiple_time_ranges(project_id, network_id, time_windows, favorite_nodes, mongo_host, db_name):
+def create_multiple_time_ranges(project_id, network_id, edgeType, time_windows, favorite_nodes, mongo_host, db_name):
     mongo = MongoWrapper(mongo_host, db_name)
     network = mongo.get_network_from_networks_collection_by_object_id(network_id)
     time_ranges = []
     for time_window in time_windows:
         start_date = time_window['start_date']
         end_date = time_window['end_date']
-        time_range = create_time_range(network, start_date, end_date, mongo)
-        metrics_utils.calculateNetworkMetrics(time_range.network)
+        time_range = create_time_range(network, start_date, end_date, edgeType, mongo)
+        networkMetrics = metrics_utils.calculateNetworkMetrics(time_range.network)
+        time_range.network.networkMetrics = networkMetrics
         for node_id in favorite_nodes:
             node_metrics = metrics_utils.calculateNodeMetrics(time_range.network, node_id)
             time_range.network.nodeMetrics[node_id] = node_metrics

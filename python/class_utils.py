@@ -17,7 +17,7 @@ class User:
         self.created_at = created_at
 
     def __str__(self):
-        return f'{self.id}'
+        return f'{self.screen_name}'
             
 class Tweet:
     def __init__(self, id, text, created_at, user):
@@ -30,30 +30,51 @@ class Tweet:
         return f'Text: {self.text}'
 
 class Network:
-    def __init__(self, networkType, _id=None):
-        self.networkType = networkType
-        self.nodes = None
-        self.edges = []
-        self.numberOfNodes = None
-        self.numberOfEdges = None
-        self.density = None
-        self.diameter = None
-        self.radius =None
-        self.reciprocity = None
-        self.degreeCentrality = None
-        self.nodeMetrics = {}
+    def __init__(self, _id=None):
         self._id = _id
+        self.networkMetrics = {
+            'numberOfNodes': None,
+            'numberOfEdges': None,
+            'density': None,
+            'diameter': None,
+            'radius': None,
+            'reciprocity': None,
+            'degreeCentrality': None
+        }
+        self.retweetNetworkMetrics = {
+            'numberOfNodes': None,
+            'numberOfEdges': None,
+            'density': None,
+            'diameter': None,
+            'radius': None,
+            'reciprocity': None,
+            'degreeCentrality': None
+        }
+        self.quoteNetworkMetrics = {
+            'numberOfNodes': None,
+            'numberOfEdges': None,
+            'density': None,
+            'diameter': None,
+            'radius': None,
+            'reciprocity': None,
+            'degreeCentrality': None
+        }
+        self.nodeMetrics = {
+        }
+        self.nodes = set()
+        self.edges = [] 
 
 class Edge:
-    def __init__(self, source, destination, timestamp, edgeContent, _id=None):
+    def __init__(self, source, destination, edgeContent, timestamp, edgeType, _id=None):
         self.source = source
         self.destination = destination
-        self.timestamp = timestamp
         self.edgeContent = edgeContent
+        self.timestamp = timestamp
+        self.edgeType = edgeType
         self._id = _id
 
 class Project:
-    def __init__(self, title, description, dataset, startDate, endDate, edgeType, timeRanges, networks, favoriteNodes):
+    def __init__(self, title, description, dataset, startDate, endDate, edgeType, timeRanges, sourceNetwork, favoriteNodes):
         self.createdDate = datetime.datetime.now(pytz.utc)
         self.title = title
         self.description = description
@@ -62,7 +83,7 @@ class Project:
         self.endDate = endDate
         self.edgeType = edgeType
         self.timeRanges = timeRanges
-        self.networks = networks
+        self.sourceNetwork = sourceNetwork
         self.favoriteNodes = favoriteNodes
 
 class TimeRange:
@@ -173,11 +194,11 @@ def replaceUserIdsWithUserObjects(tweets):
 
 # Parse network data into a network
 def parseNetworkData(data):
-    network = Network('Directed')
+    network = Network()
     for edge in data:
-        network.edges.append(Edge(int(edge['source']), int(edge['destination']), edge['timestamp'], edge['edgeContent']))
-        network.nodes[int(edge['source'])] = User(int(edge['source']), '', '', '', '', 0, 0, 0, '')
-        network.nodes[int(edge['destination'])] = User(int(edge['destination']), '', '', '', '', 0, 0, 0, '')
+        network.edges.append(Edge(edge['source'], edge['destination'], edge['timestamp'], edge['edgeContent'], edge['edgeType']))
+        network.nodes.add(edge['source'])
+        network.nodes.add(edge['destination'])
     return network
 
 # Replace network source and destination ids with user objects

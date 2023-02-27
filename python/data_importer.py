@@ -19,7 +19,7 @@ def get_users(tweepyWrapper, screen_names):
         try:
             users.extend(tweepyWrapper.get_users(screen_names[i:i+100]))
         except:
-            pass
+            continue
 
     # get remaining users
     try:
@@ -62,8 +62,9 @@ def get_tweets(tweepyWrapper, users, start_date, end_date, limit=None):
 
 
 def get_retweets_network(tweepyWrapper, tweets):
-    retweetNetwork = Network('retweet')
+    retweetNetwork = Network()
     for tweet in tweets:
+        retweetNetwork.nodes.add(tweet.user.id)
         retweets = tweepyWrapper.get_retweets(tweet.id)
         for retweet in retweets:
             retweetNetwork.edges.append(
@@ -71,14 +72,17 @@ def get_retweets_network(tweepyWrapper, tweets):
                     source=retweet.user.id,
                     destination=tweet.user,
                     timestamp=retweet.created_at,
-                    edgeContent=tweet.text
+                    edgeContent=f'Original Tweet ID: ${tweet.id}. Retweet ID: ${retweet.id}. Retweet Text: ${retweet.text}',
+                    edgeType='retweet'
                 )
             )
+            retweetNetwork.nodes.add(retweet.user.id)
     return retweetNetwork
 
 def get_quotes_network(tweepyWrapper, tweets, start_date, end_date, limit=None):
-    quoteNetwork = Network('quote')
+    quoteNetwork = Network()
     for tweet in tweets:
+        quoteNetwork.nodes.add(tweet.user.id)
         quotes = tweepyWrapper.get_quote_tweets(tweet.id, start_date, end_date, limit=limit)
         for quote in quotes:
             quoteNetwork.edges.append(
@@ -86,10 +90,20 @@ def get_quotes_network(tweepyWrapper, tweets, start_date, end_date, limit=None):
                     source=quote.author_id,
                     destination=tweet.user,
                     timestamp=quote.created_at,
-                    edgeContent=tweet.text
+                    edgeContent=f'Original Tweet ID: ${tweet.id}. Quote Tweet ID: ${quote.id}. Quote Tweet Text: ${quote.text}',
+                    edgeType='quote'
                 )
             )
+            quoteNetwork.nodes.add(quote.author_id)
     return quoteNetwork
+
+def merge_Networks(retweetNetwork, quoteNetwork):
+    mergedNetwork = Network()
+    mergedNetwork.nodes = retweetNetwork.nodes.union(quoteNetwork.nodes)
+    mergedNetwork.edges = retweetNetwork.edges + quoteNetwork.edges
+    mergedNetwork.retweetNetworkMetrics = retweetNetwork.networkMetrics
+    mergedNetwork.quoteNetworkMetrics = quoteNetwork.networkMetrics
+    return mergedNetwork
 
 def get_user_ids_from_network_source_nodes(network, exclude_users=None):
     if exclude_users is None:
@@ -108,7 +122,7 @@ def get_users_by_id_as_dict(tweepyWrapper, user_ids):
         try:
             users.extend(tweepyWrapper.get_users_by_id(user_ids[i:i+100]))
         except:
-            pass
+            continue
 
     # get remaining users
     try:
@@ -177,20 +191,9 @@ def import_data(project_id, limit=None, db_name='test'):
     # replace source ids with user objects
     replace_source_ids_with_users(retweetNetwork, source_users_dict)
 
-    # save initial_users to mongo
-    mongo_utils.save_users(initial_users, mongo_host=mongo_host, db_name=db_name)
-    
-    # save source_users_dict to mongo
-    mongo_utils.save_users(list(source_users_dict.values()), mongo_host=mongo_host, db_name=db_name)
-
-    # calculate network metrics
-    metrics_utils.calculateNetworkMetrics(retweetNetwork)
-
-    # save retweetNetwork to mongo
-    retweetNetwork_object_id = mongo_utils.save_network(retweetNetwork, mongo_host=mongo_host, db_name=db_name)
-
-    # insert network id into project
-    mongo_utils.insert_network_to_project(project_id, retweetNetwork_object_id, mongo_host=mongo_host, db_name=db_name)
+    # calculate retweet network metrics
+    retweetNetworkMetrics = metrics_utils.calculateNetworkMetrics(retweetNetwork)
+    retweetNetwork.networkMetrics = retweetNetworkMetrics
 
     # build quote network
     quoteNetwork = get_quotes_network(tweepyWrapper, tweetList, startDate, endDate)
@@ -207,14 +210,25 @@ def import_data(project_id, limit=None, db_name='test'):
     # replace source ids with user objects
     replace_source_ids_with_users(quoteNetwork, source_users_dict)
 
-    # save missing_source_users_dict to mongo
-    mongo_utils.save_users(list(missing_source_users_dict.values()), mongo_host=mongo_host, db_name=db_name)
+    # calculate network metrics
+    quoteNetworkMetrics = metrics_utils.calculateNetworkMetrics(quoteNetwork)
+    quoteNetwork.networkMetrics = quoteNetworkMetrics
+
+    # merge networks into one
+    mergedNetwork = merge_Networks(retweetNetwork, quoteNetwork)
 
     # calculate network metrics
-    metrics_utils.calculateNetworkMetrics(quoteNetwork)
+    mergedNetworkMetrics = metrics_utils.calculateNetworkMetrics(mergedNetwork)
+    mergedNetwork.networkMetrics = mergedNetworkMetrics
 
-    # save quoteNetwork to mongo
-    quoteNetwork_object_id = mongo_utils.save_network(quoteNetwork, mongo_host=mongo_host, db_name=db_name)
+    # save initial_users to mongo
+    mongo_utils.save_users(initial_users, mongo_host=mongo_host, db_name=db_name)
+    
+    # save source_users_dict to mongo
+    mongo_utils.save_users(list(source_users_dict.values()), mongo_host=mongo_host, db_name=db_name)
+
+    # save mergedNetwork to mongo
+    mergedNetwork_object_id = mongo_utils.save_network(mergedNetwork, mongo_host=mongo_host, db_name=db_name)
 
     # insert network id into project
-    mongo_utils.insert_network_to_project(project_id, quoteNetwork_object_id, mongo_host=mongo_host, db_name=db_name)
+    mongo_utils.insert_network_to_project(project_id, mergedNetwork_object_id, mongo_host=mongo_host, db_name=db_name)
