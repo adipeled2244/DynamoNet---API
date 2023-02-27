@@ -48,11 +48,9 @@ exports.projectController = {
    * @param {string} req.body.dataset
    * @param {string} req.body.startDate
    * @param {string} req.body.endDate
-   * @param {string} req.body.edgeType
-   * @param {string} req.body.timeRanges // optional
-   * @param {string} req.body.networks // optional
    * @param {string} req.body.userId // not part of the project schema
    * @param {string} req.body.userEmail // not part of the project schema -- optional
+   * @param {string} req.body.limit // not part of the project schema -- optional
    *
    */
   async addProject(req, res) {
@@ -66,14 +64,17 @@ exports.projectController = {
     projectParams.createdDate = Date.now();
     try {
       const newProject = await projectService.addProject(projectParams);
-
+      const pythonArguments = [
+        "./python/virtual_twitter.py",
+        `--project_id=${newProject._id}`,
+        `--user_email=${userEmail}`,
+      ];
+      if (projectParams.limit !== undefined) {
+        pythonArguments.push(`--limit=${projectParams.limit}`);
+      }
       const pythonProcess = spawn(
         "python",
-        [
-          "./python/virtual_twitter.py",
-          `--project_id=${newProject._id}`,
-          `--user_email=${userEmail}`,
-        ],
+        pythonArguments,
         (options = {
           detached: true,
         })
@@ -94,7 +95,10 @@ exports.projectController = {
       });
       // TODO: needs fixing - updateUser recieves user id and params object:change this id to currentUserId when we will do autheniccation
       //add projectRef to user projects
-      const updateUserRes = await userService.updateUser(ObjectId("63f54084512dd78a25a3646a"),newProject._id);
+      const updateUserRes = await userService.updateUser(
+        ObjectId("63f54084512dd78a25a3646a"),
+        newProject._id
+      );
 
       res.status(200).json({ project: newProject });
     } catch (err) {
@@ -161,11 +165,9 @@ exports.projectController = {
           .json({ error: "twiiter id already exist in favoriteNodes array" });
       }
     } catch (err) {
-      res
-        .status(500)
-        .json({
-          error: `Error add new favorite node ${projectIdParam} , node: ${twitterIdParam}: ${err}`,
-        });
+      res.status(500).json({
+        error: `Error add new favorite node ${projectIdParam} , node: ${twitterIdParam}: ${err}`,
+      });
       return;
     }
 
@@ -226,11 +228,9 @@ exports.projectController = {
 
       [deleteResultA] = await Promise.all(deletePromises);
     } catch (err) {
-      res
-        .status(500)
-        .json({
-          error: `Error remove node ${projectIdParam} , node: ${twitterIdParam}: ${err}`,
-        });
+      res.status(500).json({
+        error: `Error remove node ${projectIdParam} , node: ${twitterIdParam}: ${err}`,
+      });
       return;
     }
 
@@ -242,6 +242,4 @@ exports.projectController = {
         .json({ error: "ProjectId or twitterId not found" });
     }
   },
-
-
 };
