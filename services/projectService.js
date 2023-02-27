@@ -65,7 +65,7 @@ async function deleteProject(projectId) {
     throw Error(`Project id : ${projectId} not found`);
   }
   await timeRangeService.deleteTimeRanges(project.timeRanges, projectId);
-  await networkService.deleteNetwork(project.network);
+  await networkService.deleteNetwork(project.sourceNetwork);
   return await Project.deleteOne({ _id: projectId });
 }
 
