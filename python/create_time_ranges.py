@@ -12,7 +12,6 @@ def main(args):
         'start_date': datetime.datetime.strptime(time_window['startDate'], js_date_format),
         'end_date': datetime.datetime.strptime(time_window['endDate'], js_date_format)
     } for time_window in args.time_windows]
-    # create time ranges
     time_ranges = mongo_utils.create_multiple_time_ranges(args.project_id, args.network_id, args.edgeType, args.time_windows, args.favorite_nodes, mongo_host, 'test')
     pass
 

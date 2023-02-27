@@ -4,6 +4,7 @@
 # pip install pymongo
 
 
+import pytz
 from config import bearer_token, consumer_key, consumer_secret, access_token, access_token_secret
 from config import mongo_host
 
@@ -61,12 +62,17 @@ def get_tweets(tweepyWrapper, users, start_date, end_date, limit=None):
     return tweetList
 
 
-def get_retweets_network(tweepyWrapper, tweets):
+def get_retweets_network(tweepyWrapper, tweets, start_date, end_date, limit=None):
+    start_date = pytz.utc.localize(start_date)
+    end_date = pytz.utc.localize(end_date)
     retweetNetwork = Network()
     for tweet in tweets:
-        retweetNetwork.nodes.add(tweet.user.id)
+        retweetNetwork.nodes.add(tweet.user.screen_name)
         retweets = tweepyWrapper.get_retweets(tweet.id)
+        limit_per_tweet = limit
         for retweet in retweets:
+            if retweet.created_at < start_date or retweet.created_at > end_date:
+                continue
             retweetNetwork.edges.append(
                 Edge(
                     source=retweet.user.id,
@@ -76,13 +82,17 @@ def get_retweets_network(tweepyWrapper, tweets):
                     edgeType='retweet'
                 )
             )
-            retweetNetwork.nodes.add(retweet.user.id)
+            retweetNetwork.nodes.add(retweet.user.screen_name)
+            if limit_per_tweet is not None:
+                limit_per_tweet -= 1
+                if limit_per_tweet == 0:
+                    break
     return retweetNetwork
 
 def get_quotes_network(tweepyWrapper, tweets, start_date, end_date, limit=None):
     quoteNetwork = Network()
     for tweet in tweets:
-        quoteNetwork.nodes.add(tweet.user.id)
+        quoteNetwork.nodes.add(tweet.user.screen_name)
         quotes = tweepyWrapper.get_quote_tweets(tweet.id, start_date, end_date, limit=limit)
         for quote in quotes:
             quoteNetwork.edges.append(
@@ -94,7 +104,8 @@ def get_quotes_network(tweepyWrapper, tweets, start_date, end_date, limit=None):
                     edgeType='quote'
                 )
             )
-            quoteNetwork.nodes.add(quote.author_id)
+            # quoteNetwork.nodes.add(quote.author_id)
+            print(quote.created_at)
     return quoteNetwork
 
 def merge_Networks(retweetNetwork, quoteNetwork):
@@ -163,6 +174,10 @@ def import_data(project_id, limit=None, db_name='test'):
     startDate = project['startDate']
     endDate = project['endDate']
 
+    print('Dataset: ', dataset)
+    print('Start date: ', startDate)
+    print('End date: ', endDate)
+
     # set up tweepy wrapper
     tweepyWrapper = TweepyWrapper(bearer_token, consumer_key, consumer_secret, access_token, access_token_secret)
 
@@ -176,10 +191,11 @@ def import_data(project_id, limit=None, db_name='test'):
     if len(tweetList) == 0:
         print('No tweets found')
         return
+    
     # build retweet network
-    retweetNetwork = get_retweets_network(tweepyWrapper, tweetList)
+    retweetNetwork = get_retweets_network(tweepyWrapper, tweetList, startDate, endDate, limit=limit)
     print('Retweet network len: ', len(retweetNetwork.edges))
-
+    
     # get source users from retweet network
     sourceUsers = get_user_ids_from_network_source_nodes(retweetNetwork)
     print('Source users len: ', len(sourceUsers))
@@ -191,17 +207,13 @@ def import_data(project_id, limit=None, db_name='test'):
     # replace source ids with user objects
     replace_source_ids_with_users(retweetNetwork, source_users_dict)
 
-    for edge in retweetNetwork.edges:
-        retweetNetwork.nodes.add(edge.source)
-        retweetNetwork.nodes.add(edge.destination)
-
     # calculate retweet network metrics
     retweetNetworkMetrics = metrics_utils.calculateNetworkMetrics(retweetNetwork)
     retweetNetwork.networkMetrics = retweetNetworkMetrics
 
     # build quote network
     quoteNetwork = get_quotes_network(tweepyWrapper, tweetList, startDate, endDate)
-
+    
     # get source users from quote network
     missing_source_users = get_user_ids_from_network_source_nodes(quoteNetwork, exclude_users=sourceUsers)
 
@@ -213,10 +225,10 @@ def import_data(project_id, limit=None, db_name='test'):
 
     # replace source ids with user objects
     replace_source_ids_with_users(quoteNetwork, source_users_dict)
-
-    for edge in quoteNetwork.edges:
-        quoteNetwork.nodes.add(edge.source)
-        quoteNetwork.nodes.add(edge.destination)
+    
+    # add missing users to quote network's nodes
+    for user in missing_source_users_dict.values():
+        quoteNetwork.nodes.add(user.screen_name)
 
     # calculate network metrics
     quoteNetworkMetrics = metrics_utils.calculateNetworkMetrics(quoteNetwork)

@@ -553,12 +553,17 @@ def create_multiple_time_ranges(project_id, network_id, edgeType, time_windows, 
     for time_window in time_windows:
         start_date = time_window['start_date']
         end_date = time_window['end_date']
+        print('creating time range from {} to {}'.format(start_date, end_date))
+        print('edgeType: {}'.format(edgeType))
         time_range = create_time_range(network, start_date, end_date, edgeType, mongo)
+        print('calculating network metrics')
         networkMetrics = metrics_utils.calculateNetworkMetrics(time_range.network)
         time_range.network.networkMetrics = networkMetrics
+        print('calculating node metrics')
         for node_id in favorite_nodes:
             node_metrics = metrics_utils.calculateNodeMetrics(time_range.network, node_id)
             time_range.network.nodeMetrics[node_id] = node_metrics
+        print('saving time range')
         save_time_range(time_range, project_id, mongo)
         time_ranges.append(time_range)
     mongo.close()

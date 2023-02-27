@@ -63,7 +63,7 @@ exports.timeRangeController = {
           `--project_id=${projectId}`,
           `--network_id=${networkId}`,
           `--favorite_nodes=${JSON.stringify(favoriteNodes.favoriteNodes)}`,
-          `--edge_type=${edgeType}`,
+          `--edgeType=${edgeType}`,
           `--time_windows=${JSON.stringify(timeWindows)}`,
         ],
         (options = { detached: true })
