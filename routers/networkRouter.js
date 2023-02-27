@@ -7,5 +7,6 @@ networkRouter.get('/:networkId', networkController.getNetwork);
 networkRouter.post('/', networkController.addNetwork);
 networkRouter.patch('/:networkId', networkController.updateNetwork);
 networkRouter.delete('/:networkId', networkController.deleteNetwork);
+networkRouter.get('/:networkId/edges', networkController.getNetworkEdgesByType);
 
 module.exports = { networkRouter };

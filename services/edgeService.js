@@ -7,8 +7,8 @@ module.exports={
     updateEdge,
     getEdge,
     deleteEdge,
-    getEdges,
-    getNetworkEdgesByType
+    getEdges
+    
 }
 async function addEdge(params){
     logger.info(`[addEdge] - ${path.basename(__filename)}`);

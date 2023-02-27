@@ -42,8 +42,6 @@ exports.networkController = {
             const newNetwork = await networkService.addNetwork(networkParams);                        
             res.status(200).json({network: newNetwork});
         } catch (err) {
-            console.error(err+'\n\n');
-            console.error(JSON.stringify(err));
             res.status(400).json({ error: ` ${err}` });
             return;
         }
@@ -79,5 +77,26 @@ exports.networkController = {
             res.status(500).json({ error: `Error deleting Network ${networkIdParam} : ${err}` });
             return;
         }
+    },
+    
+  async getNetworkEdgesByType(req, res) {
+    logger.info(`[getNetworkEdgesByType] - ${path.basename(__filename)}`);
+    const networkIdParam = req.params.networkId;
+    const edgeType = req.query.type;
+    let network;
+    network = await networkService.getNetwork(networkIdParam);
+    if(!network){
+        return res.status(404).json({ error: "Network id not found" });
     }
+    networkEdges=network.edges;
+    try {
+      const filterEdges= networkEdges.filter((edge)=>{
+        return edge.edgeType===edgeType;
+      })
+      res.status(200).json({filterEdges})
+    } catch (err) {
+        res.status(500).json({ error: `Error get edges from type ${type} for projectId ${projectIdParam} : ${err}` });
+        return;
+    }
+},
 };

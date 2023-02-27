@@ -243,25 +243,5 @@ exports.projectController = {
     }
   },
 
-  
-  async getNetworkEdgesByType(req, res) {
-    logger.info(`[getNetworkEdgesByType] - ${path.basename(__filename)}`);
-      const projectIdParam = req.params.projectId;
-     const project = await projectService.getProject(projectIdParam);
-      if (project) {
-        projectEdges=project.network.edges;
-      } else {
-        return res.status(404).json({ error: "Project id not found" });
-      }
-    const edgeType = req.query.type;
-    try {
-      const filterEdges= projectEdges.filter((edge)=>{
-        return edge.edgeType===edgeType;
-      })
-      res.status(200).json({filterEdges})
-    } catch (err) {
-        res.status(500).json({ error: `Error get edges from type ${type} for projectId ${projectIdParam} : ${err}` });
-        return;
-    }
-},
+
 };

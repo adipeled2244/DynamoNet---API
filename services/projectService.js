@@ -42,7 +42,7 @@ async function getProject(projectId, populate = true) {
     return await Project.findOne({ _id: projectId });
   }
   return await Project.findOne({ _id: projectId }).populate(
-    "network timeRanges",
+    "sourceNetwork timeRanges",
     "-edges"
   );
 }
@@ -52,7 +52,7 @@ async function getProjects(populate = true) {
   if (!populate) {
     return await Project.find({});
   }
-  return await Project.find({}).populate("networks timeRanges", "-edges");
+  return await Project.find({}).populate("sourceNetwork timeRanges", "-edges");
 }
 
 async function deleteProject(projectId) {
