@@ -17,13 +17,13 @@ async function getTimeRange(timeRangeId) {
   logger.info(`[getTimeRange] - ${path.basename(__filename)}`);
   return await TimeRange.findOne({ _id: timeRangeId }).populate(
     "network",
-    "-edges"
+    "-edges -nodes"
   );
 }
 
 async function getTimeRanges() {
   logger.info(`[getTimeRanges] - ${path.basename(__filename)}`);
-  return await TimeRange.find({}).populate("network", "-edges");
+  return await TimeRange.find({}).populate("network", "-edges -nodes");
 }
 
 async function deleteTimeRange(timeRangeId, projectId) {
@@ -62,12 +62,10 @@ async function deleteTimeRanges(timeRangeIds, projectId) {
   projectTimeRangeIds = project.timeRanges.map((timeRange) =>
     timeRange._id.toString()
   );
-  console.log(projectTimeRangeIds);
 
   const invalidTimeRanges = timeRangeIds.filter(
     (id) => !projectTimeRangeIds.includes(id.toString())
   );
-  console.log(invalidTimeRanges);
 
   if (invalidTimeRanges.length > 0) {
     throw Error(
@@ -75,14 +73,22 @@ async function deleteTimeRanges(timeRangeIds, projectId) {
     );
   }
 
+  projectTimeRangeIdsToKeep = project.timeRanges.filter(
+    (timeRange) => !timeRangeIds.includes(timeRange._id.toString())
+  );
+
   await Project.updateOne(
     { _id: projectId },
     {
-      timeRanges: projectTimeRangeIds,
+      timeRanges: projectTimeRangeIdsToKeep,
     }
   );
 
-  const networkIds = project.timeRanges.map((timeRange) => timeRange.network);
+  const networkIds = project.timeRanges.map((timeRange) => {
+    if (timeRangeIds.includes(timeRange._id.toString())) {
+      return timeRange.network;
+    }
+  });
   await Network.deleteMany({ _id: { $in: networkIds } });
   return await TimeRange.deleteMany({ _id: { $in: timeRangeIds } });
 }
