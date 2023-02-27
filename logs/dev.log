@@ -353,3 +353,11 @@ info:  GET |  /api/networks/63fcc89656cde2fae023188f  | Mon Feb 27 2023 17:27:35
 info:  GET |  /api/networks/63fcc89356cde2fae023188d  | Mon Feb 27 2023 17:28:21 GMT+0200  
 info:  GET |  /api/networks/63fcc88b56cde2fae023188b  | Mon Feb 27 2023 17:28:48 GMT+0200  
 info:  GET |  /api/networks/63fcc88256cde2fae0231889  | Mon Feb 27 2023 17:29:15 GMT+0200  
+info:  POST |  /api/projects  | Mon Feb 27 2023 17:42:37 GMT+0200  
+info:  POST |  /api/projects  | Mon Feb 27 2023 17:43:37 GMT+0200  
+info:  POST |  /api/projects  | Mon Feb 27 2023 17:44:00 GMT+0200  
+info:  POST |  /api/projects  | Mon Feb 27 2023 17:46:01 GMT+0200  
+info:  POST |  /api/projects  | Mon Feb 27 2023 17:47:17 GMT+0200  
+info:  POST |  /api/projects  | Mon Feb 27 2023 17:48:54 GMT+0200  
+info:  POST |  /api/projects  | Mon Feb 27 2023 17:51:17 GMT+0200  
+info:  POST |  /api/projects  | Mon Feb 27 2023 17:52:36 GMT+0200  

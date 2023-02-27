@@ -72,6 +72,7 @@ exports.projectController = {
       if (projectParams.limit !== undefined) {
         pythonArguments.push(`--limit=${projectParams.limit}`);
       }
+      logger.info(`PYTHON import arguments: ${pythonArguments}`);
       const pythonProcess = spawn(
         "python",
         pythonArguments,

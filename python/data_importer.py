@@ -191,6 +191,10 @@ def import_data(project_id, limit=None, db_name='test'):
     # replace source ids with user objects
     replace_source_ids_with_users(retweetNetwork, source_users_dict)
 
+    for edge in retweetNetwork.edges:
+        retweetNetwork.nodes.add(edge.source)
+        retweetNetwork.nodes.add(edge.destination)
+
     # calculate retweet network metrics
     retweetNetworkMetrics = metrics_utils.calculateNetworkMetrics(retweetNetwork)
     retweetNetwork.networkMetrics = retweetNetworkMetrics
@@ -209,6 +213,10 @@ def import_data(project_id, limit=None, db_name='test'):
 
     # replace source ids with user objects
     replace_source_ids_with_users(quoteNetwork, source_users_dict)
+
+    for edge in quoteNetwork.edges:
+        quoteNetwork.nodes.add(edge.source)
+        quoteNetwork.nodes.add(edge.destination)
 
     # calculate network metrics
     quoteNetworkMetrics = metrics_utils.calculateNetworkMetrics(quoteNetwork)
