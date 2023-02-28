@@ -4,6 +4,10 @@ const timeRangeRouter = new Router();
 
 timeRangeRouter.get("/", timeRangeController.getTimeRanges);
 timeRangeRouter.get("/:timeRangeId", timeRangeController.getTimeRange);
+timeRangeRouter.get(
+  "/:timeRangeId/network",
+  timeRangeController.getTimeRangeWithNetwork
+);
 timeRangeRouter.post("/", timeRangeController.addTimeRanges);
 timeRangeRouter.delete(
   "/:timeRangeId/projects/:projectId",

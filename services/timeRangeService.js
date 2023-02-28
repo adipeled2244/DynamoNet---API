@@ -12,6 +12,7 @@ module.exports = {
   getTimeRanges,
   deleteTimeRanges,
   updateTimeRange,
+  getTimeRangeWithNetwork,
 };
 
 async function getTimeRange(timeRangeId) {
@@ -20,6 +21,11 @@ async function getTimeRange(timeRangeId) {
     "network",
     "-edges -nodes"
   );
+}
+
+async function getTimeRangeWithNetwork(timeRangeId) {
+  logger.info(`[getTimeRangeWithNetwork] - ${path.basename(__filename)}`);
+  return await TimeRange.findOne({ _id: timeRangeId }).populate("network");
 }
 
 async function getTimeRanges() {

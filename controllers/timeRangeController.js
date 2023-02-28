@@ -24,7 +24,26 @@ exports.timeRangeController = {
       return;
     }
   },
-
+  async getTimeRangeWithNetwork(req, res) {
+    logger.info(`[getTimeRangeWithNetwork] - ${path.basename(__filename)}`);
+    let timeRange;
+    const timeRangeIdParam = req.params.timeRangeId;
+    try {
+      timeRange = await timeRangeService.getTimeRangeWithNetwork(
+        timeRangeIdParam
+      );
+      if (timeRange) {
+        return res.status(200).json({ timeRange });
+      } else {
+        return res.status(404).json({ error: "TimeRange id not found" });
+      }
+    } catch (err) {
+      res
+        .status(500)
+        .send({ error: `Error get timeRange: ${timeRangeIdParam} : ${err}` });
+      return;
+    }
+  },
   async getTimeRanges(req, res) {
     logger.info(`[getTimeRange] - ${path.basename(__filename)}`);
     let timeRanges;
