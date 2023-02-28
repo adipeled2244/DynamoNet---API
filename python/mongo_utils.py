@@ -142,15 +142,15 @@ class MongoWrapper:
             "registrationDateTwitter" : user.created_at
         } for user in users], ordered=False)
 
-    def get_users_from_node_collection_by_id(self, users):
+    def get_users_from_node_collection_by_id(self, users_id):
         self.nodes_collection_setup()
         nodes_collection = self.get_collection('nodes')
-        return nodes_collection.find({'twitterId': {'$in': [str(user.id) for user in users]}})
+        return nodes_collection.find({'twitterId': {'$in': [str(user_id) for user_id in users_id]}})
     
-    def get_users_from_node_collection_by_screen_name(self, users):
+    def get_users_from_node_collection_by_screen_name(self, users_screen_names):
         self.nodes_collection_setup()
         nodes_collection = self.get_collection('nodes')
-        return nodes_collection.find({'screenName': {'$in': [str(user.screen_name) for user in users]}})
+        return nodes_collection.find({'screenName': {'$in': [str(screen_name) for screen_name in users_screen_names]}})
 
     def edges_collection_setup(self):
         edge_validator = {
