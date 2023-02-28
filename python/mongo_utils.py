@@ -289,7 +289,7 @@ class MongoWrapper:
         networks_collection = self.get_collection('networks')
         return networks_collection.delete_many({'_id': {'$nin': [ObjectId(id) for id in ids]}})
 
-    def update_node_in_network(self, network_id, node_id, node_metrics):
+    def update_node_in_network(self, network_id, node, node_metrics):
         self.networks_collection_setup()
         networks_collection = self.get_collection('networks')
         return networks_collection.update_one({
@@ -297,7 +297,7 @@ class MongoWrapper:
                                                 }, 
                                                 {
                                                 '$set': {
-                                                    f'nodeMetrics.{node_id}': node_metrics
+                                                    f'nodeMetrics.{node}': node_metrics
                                                     }
                                                 })
 
@@ -592,8 +592,8 @@ def create_multiple_time_ranges(project_id, network_id, edgeType, time_windows, 
     mongo.close()
     return time_ranges
 
-def update_node_metrics_in_project(project_id, node_id, mongo_host, db_name):
-    mongo = MongoWrapper(mongo_host, 'test')
+def update_node_metrics_in_project(project_id, screen_name, mongo_host, db_name):
+    mongo = MongoWrapper(mongo_host, db_name)
     mongo.update_project_status(project_id, constants.project_calculating_node_metrics)
     project = mongo.get_project_from_projects_collection_by_object_id(project_id)
     if project is None:
@@ -604,8 +604,8 @@ def update_node_metrics_in_project(project_id, node_id, mongo_host, db_name):
         time_range = mongo.get_time_range_from_timeRanges_collection_by_object_id(time_range_id)
         network = mongo.get_network_from_networks_collection_by_object_id(time_range['network'])        
         network = mongo_network_to_network(network, mongo)
-        node_metrics = metrics_utils.calculateNodeMetrics(network, node_id)
-        network.nodeMetrics[node_id] = node_metrics
-        mongo.update_node_in_network(network._id, node_id, node_metrics)
+        node_metrics = metrics_utils.calculateNodeMetrics(network, screen_name)
+        network.nodeMetrics[screen_name] = node_metrics
+        mongo.update_node_in_network(network._id, screen_name, node_metrics)
     mongo.update_project_status(project_id, constants.project_ready)
     mongo.close()

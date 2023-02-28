@@ -85,28 +85,28 @@ async function getFavoriteNode(projectId, twitterId) {
   });
 }
 
-async function addFavoriteNode(projectId, twitterId) {
+async function addFavoriteNode(projectId, username) {
   logger.info(`[addFavoriteNode] - ${path.basename(__filename)}`);
 
   return await Project.updateOne(
-    { _id: projectId, favoriteNodes: { $ne: twitterId } },
-    { $addToSet: { favoriteNodes: twitterId } }
+    { _id: projectId, favoriteNodes: { $ne: username } },
+    { $addToSet: { favoriteNodes: username } }
   );
 
   // return await Project.updateOne({ _id: projectId }, { $push: { favoriteNodes: twitterId } });
 }
 
-async function removeFavoriteNodeFromFavoriteNodes(projectId, twitterId) {
+async function removeFavoriteNodeFromFavoriteNodes(projectId, username) {
   logger.info(
     `[removeFavoriteNodeFromFavoriteNodes] - ${path.basename(__filename)}`
   );
   return await Project.updateOne(
     { _id: projectId },
-    { $pull: { favoriteNodes: twitterId } }
+    { $pull: { favoriteNodes: username } }
   );
 }
 
-async function removeFavoriteNodeFromTimeRangesNetwork(projectId, twitterId) {
+async function removeFavoriteNodeFromTimeRangesNetwork(projectId, username) {
   logger.info(
     `[removeFavoriteNodeFromTimeRangesNetwork] - ${path.basename(__filename)}`
   );
@@ -128,8 +128,8 @@ async function removeFavoriteNodeFromTimeRangesNetwork(projectId, twitterId) {
     }
     const nodeMetrics = network.nodeMetrics;
     if (!nodeMetrics) continue;
-    if (nodeMetrics.has(twitterId)) {
-      nodeMetrics.delete(twitterId);
+    if (nodeMetrics.has(username)) {
+      nodeMetrics.delete(username);
       network.markModified("nodeMetrics");
       promises.push(network.save());
     }
