@@ -11,6 +11,7 @@ module.exports = {
   getTimeRange,
   getTimeRanges,
   deleteTimeRanges,
+  updateTimeRange,
 };
 
 async function getTimeRange(timeRangeId) {
@@ -91,4 +92,26 @@ async function deleteTimeRanges(timeRangeIds, projectId) {
   });
   await Network.deleteMany({ _id: { $in: networkIds } });
   return await TimeRange.deleteMany({ _id: { $in: timeRangeIds } });
+}
+
+async function updateTimeRange(timeRangeId, projectId, timeRangeParams) {
+  logger.info(`[updateTimeRange] - ${path.basename(__filename)}`);
+  const project = await Project.findOne({ _id: projectId });
+  if (!project) {
+    throw Error(`Project id : ${projectId} not found`);
+  }
+  if (!project.timeRanges.includes(ObjectId(timeRangeId))) {
+    throw Error(
+      `TimeRange id : ${timeRangeId} not found in project ${projectId} `
+    );
+  }
+  const timeRange = await TimeRange.findOne({ _id: timeRangeId });
+  if (!timeRange) {
+    throw Error(`TimeRange id : ${timeRangeId} not found`);
+  }
+  const { title } = timeRangeParams;
+  if (title) {
+    timeRange.title = title;
+  }
+  return await timeRange.save();
 }

@@ -130,4 +130,27 @@ exports.timeRangeController = {
       return;
     }
   },
+  async updateTimeRange(req, res) {
+    logger.info(`[updateTimeRange] - ${path.basename(__filename)}`);
+    const timeRangeParams = req.body;
+    const timeRangeIdParam = req.params.timeRangeId;
+    const projectIdParam = req.params.projectId;
+    if (!timeRangeParams || !timeRangeIdParam || !projectIdParam) {
+      res.status(400).send({ error: "invalid params" });
+    }
+    let updateResult;
+    try {
+      updateResult = await timeRangeService.updateTimeRange(
+        timeRangeIdParam,
+        projectIdParam,
+        timeRangeParams
+      );
+      return res.status(200).json({ message: `Time Range updated` });
+    } catch (err) {
+      res.status(500).json({
+        error: `Error updating time range ${timeRangeIdParam} for project ${projectIdParam} : ${err}`,
+      });
+      return;
+    }
+  },
 };
