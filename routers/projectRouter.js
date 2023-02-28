@@ -4,6 +4,10 @@ const projectRouter = new Router();
 
 projectRouter.get("/", projectController.getProjects);
 projectRouter.get("/:projectId", projectController.getProject);
+projectRouter.get(
+  "/:projectId/timeRanges",
+  projectController.getProjectWithTimeRanges
+);
 projectRouter.post("/", projectController.addProject);
 projectRouter.post(
   "/:projectId/favoriteNodes/:username",

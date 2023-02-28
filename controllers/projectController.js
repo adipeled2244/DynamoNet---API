@@ -25,7 +25,6 @@ exports.projectController = {
       return;
     }
   },
-
   async getProjects(req, res) {
     logger.info(`[getProjects] - ${path.basename(__filename)}`);
     let projects;
@@ -38,7 +37,6 @@ exports.projectController = {
       return;
     }
   },
-
   //TO DO: Change according to noor
   /**
    * @param {Object} req
@@ -239,6 +237,25 @@ exports.projectController = {
       return res.status(200).json({ message: "favorite node remove" });
     } else {
       return res.status(404).json({ error: "ProjectId or username not found" });
+    }
+  },
+  async getProjectWithTimeRanges(req, res) {
+    logger.info(`[getProjectWithTimeRanges] - ${path.basename(__filename)}`);
+    const projectIdParam = req.params.projectId;
+    let project;
+    try {
+      project = await projectService.getProjectWithTimeRanges(projectIdParam);
+    } catch (err) {
+      res.status(500).json({
+        error: `Error get project ${projectIdParam} : ${err}`,
+      });
+      return;
+    }
+
+    if (project) {
+      return res.status(200).json({ project: project });
+    } else {
+      return res.status(404).json({ error: "ProjectId not found" });
     }
   },
 };

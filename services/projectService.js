@@ -18,6 +18,7 @@ module.exports = {
   getFavoriteNode,
   removeFavoriteNodeFromFavoriteNodes,
   removeFavoriteNodeFromTimeRangesNetwork,
+  getProjectWithTimeRanges,
 };
 async function addProject(params) {
   logger.info(`[addProject] - ${path.basename(__filename)}`);
@@ -135,4 +136,23 @@ async function removeFavoriteNodeFromTimeRangesNetwork(projectId, username) {
     }
   }
   return Promise.all(promises);
+}
+
+async function getProjectWithTimeRanges(projectId) {
+  logger.info(`[getProjectWithTimeRanges] - ${path.basename(__filename)}`);
+  const project = await Project.findOne({ _id: projectId }).populate(
+    "sourceNetwork timeRanges timeRanges.network",
+    "-edges -nodes"
+  );
+  if (!project) {
+    throw new Error("Project not found");
+  }
+  for (let i = 0; i < project.timeRanges.length; i++) {
+    const timeRange = project.timeRanges[i];
+    timeRange.network = await Network.findOne(
+      { _id: timeRange.network },
+      "-edges -nodes"
+    );
+  }
+  return project;
 }
