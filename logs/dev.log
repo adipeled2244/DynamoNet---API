@@ -540,3 +540,8 @@ info:  GET |  /ws  | Tue Feb 28 2023 16:47:01 GMT+0200
 info:  GET |  /ws  | Tue Feb 28 2023 16:47:05 GMT+0200  
 info:  GET |  /api/projects/63fcf8ca0cd41b9f7c241b17/timeRanges  | Tue Feb 28 2023 17:14:11 GMT+0200  
 info:  GET |  /api/timeRanges/63fd065ac7b88a02f666bbf3  | Tue Feb 28 2023 17:21:28 GMT+0200  
+info:  GET |  /api/timeRanges/63fd065ac7b88a02f666bbf3/network  | Tue Feb 28 2023 17:25:56 GMT+0200  
+info:  GET |  /api/timeRanges/63fd08c15db8fa44ffcd419d/network  | Tue Feb 28 2023 17:44:11 GMT+0200  
+info:  GET |  /api/timeRanges/63fd065ac7b88a02f666bbf3/network  | Tue Feb 28 2023 18:04:34 GMT+0200  
+info:  GET |  /api/timeRanges/63fd065ac7b88a02f666bbf3/network  | Tue Feb 28 2023 18:04:58 GMT+0200  
+info:  GET |  /api/timeRanges/63fd065ac7b88a02f666bbf3/network  | Tue Feb 28 2023 18:06:20 GMT+0200  

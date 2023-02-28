@@ -1,6 +1,7 @@
 const logger = require("../helpers/winston");
 const path = require("path");
 const TimeRange = require("../models/timeRange");
+const Edge = require("../models/edge");
 const Project = require("../models/project");
 const mongoose = require("mongoose");
 const Network = require("../models/network");
@@ -25,7 +26,13 @@ async function getTimeRange(timeRangeId) {
 
 async function getTimeRangeWithNetwork(timeRangeId) {
   logger.info(`[getTimeRangeWithNetwork] - ${path.basename(__filename)}`);
-  return await TimeRange.findOne({ _id: timeRangeId }).populate("network");
+  const timeRange = await TimeRange.findOne({ _id: timeRangeId }).populate(
+    "network"
+  );
+  timeRange.network.edges = await Edge.find({
+    _id: { $in: timeRange.network.edges },
+  });
+  return timeRange;
 }
 
 async function getTimeRanges() {
