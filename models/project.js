@@ -10,7 +10,7 @@ const projectSchema = new Schema(
     dataset: { type: [String], required: true },
     startDate: { type: Date, required: true },
     endDate: { type: Date, required: true },
-    edgeType: { type: String, default: "unset" },
+    edgeType: { type: String, default: "all" },
     timeRanges: {
       type: [Schema.Types.ObjectId],
       ref: "TimeRange",

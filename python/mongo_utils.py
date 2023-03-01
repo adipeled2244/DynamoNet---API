@@ -564,7 +564,17 @@ def save_time_range(time_range, project_id, mongo):
     time_range_object_id = mongo.save_time_range_to_timeRanges_collection(time_range, network_object_id.inserted_id)
     return mongo.insert_time_range_into_project(project_id, time_range_object_id.inserted_id)
 
+def merge_Networks(retweetNetwork, quoteNetwork):
+    mergedNetwork = Network()
+    mergedNetwork.nodes = retweetNetwork.nodes.union(quoteNetwork.nodes)
+    mergedNetwork.edges = retweetNetwork.edges + quoteNetwork.edges
+    mergedNetwork.retweetNetworkMetrics = retweetNetwork.networkMetrics
+    mergedNetwork.quoteNetworkMetrics = quoteNetwork.networkMetrics
+    return mergedNetwork
+
 def create_multiple_time_ranges(project_id, network_id, edgeType, time_windows, favorite_nodes, mongo_host, db_name):
+    if edgeType == 'all':
+        edgeType = None
     mongo = MongoWrapper(mongo_host, db_name)
     mongo.update_project_status(project_id, constants.project_creating_time_ranges)
     network = mongo.get_network_from_networks_collection_by_object_id(network_id)
@@ -574,8 +584,24 @@ def create_multiple_time_ranges(project_id, network_id, edgeType, time_windows, 
         start_date = time_window['start_date']
         end_date = time_window['end_date']
         print('creating time range from {} to {}'.format(start_date, end_date))
-        print('edgeType: {}'.format(edgeType))
-        time_range = create_time_range(network, start_date, end_date, edgeType, mongo)
+        if edgeType is not None:
+            print('edgeType: {}'.format(edgeType))
+            time_range = create_time_range(network, start_date, end_date, edgeType, mongo)
+        else:
+            print('edgeType: retweet')
+            retweet_time_range = create_time_range(network, start_date, end_date, 'retweet', mongo)
+            print('edgeType: quote')
+            quote_time_range = create_time_range(network, start_date, end_date, 'quote', mongo)
+            print('edgeType: all')
+            time_range = TimeRange(
+                startDate=start_date,
+                endDate=end_date,
+                network=merge_Networks(retweet_time_range.network, quote_time_range.network)
+            )
+            retweetNetworkMetrics = metrics_utils.calculateNetworkMetrics(retweet_time_range.network)
+            quoteNetworkMetrics = metrics_utils.calculateNetworkMetrics(quote_time_range.network)
+            time_range.network.retweetNetworkMetrics = retweetNetworkMetrics
+            time_range.network.quoteNetworkMetrics = quoteNetworkMetrics
         print('calculating network metrics')
         networkMetrics = metrics_utils.calculateNetworkMetrics(time_range.network)
         time_range.network.networkMetrics = networkMetrics

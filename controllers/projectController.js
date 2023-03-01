@@ -60,6 +60,12 @@ exports.projectController = {
       res.status(400).send({ error: "invalid params" });
     }
     projectParams.createdDate = Date.now();
+    if (
+      !projectParams.favoriteNodes ||
+      projectParams.favoriteNodes.length === 0
+    ) {
+      projectParams.favoriteNodes = projectParams.dataset;
+    }
     try {
       const newProject = await projectService.addProject(projectParams);
       const pythonArguments = [
