@@ -29,7 +29,24 @@ async function addProject(params) {
 
 async function updateProject(id, params) {
   logger.info(`[updateProject] - ${path.basename(__filename)}`);
-  return await Project.updateOne({ _id: id }, params);
+  const project = getProject(id, false);
+  if (!project) {
+    throw Error(`Project id : ${id} not found`);
+  }
+  if (params.title) {
+    project.title = params.title;
+  }
+  if (params.description) {
+    project.description = params.description;
+  }
+  if (params.edgeType) {
+    project.edgeType = params.edgeType;
+  }
+  if (params.favoriteNodes) {
+    project.favoriteNodes = params.favoriteNodes;
+  }
+  await project.save();
+  return project;
 }
 
 async function getProjectByUserId(userId) {

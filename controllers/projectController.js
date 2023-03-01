@@ -115,15 +115,15 @@ exports.projectController = {
     logger.info(`[updateProject] - ${path.basename(__filename)}`);
     const projectIdParam = req.params.projectId;
     const projectParams = req.body;
-    let updateResult;
+    let project;
 
     try {
-      updateResult = await projectService.updateProject(
+      project = await projectService.updateProject(
         projectIdParam,
         projectParams
       );
-      if (updateResult.matchedCount == 1) {
-        return res.status(200).json({ message: "Project updated" });
+      if (project) {
+        return res.status(200).json({ project });
       } else {
         return res.status(404).json({ error: "Project id not found" });
       }
