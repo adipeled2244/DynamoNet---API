@@ -14,7 +14,7 @@ timeRangeRouter.delete(
   timeRangeController.deleteTimeRange
 );
 timeRangeRouter.delete("/", timeRangeController.deleteTimeRanges);
-timeRangeRouter.put(
+timeRangeRouter.patch(
   "/:timeRangeId/projects/:projectId",
   timeRangeController.updateTimeRange
 );
