@@ -7,68 +7,61 @@ const userService = require("../services/userService");
 const path = require("path");
 
 exports.authController = {
-  async signUp(req, res) {
+  async register(req, res) {
+    logger.info(`[register] - ${path.basename(__filename)}`);
     const userParams = req.body;
-
-    // check if user exist
-    try {
-      const user = await userService.getUserByEmail(userParams.email);
-      console.log(user)
-      if (user) {
-        res.status(400).json({ error: `User already exist` });
-        return;
-      }
-    } catch (err) {
-      res
-        .status(500)
-        .json({ error: `Error get user: ${userParams.email} : ${err}` });
-      return;
+    const user = await userService.getUserByEmail(userParams.email);
+    if (user) {
+      return res.status(400).json({ error: "Email already exists" });
     }
-    // if user does not exist, create new user
-    const salt = bcrypt.genSaltSync(saltRounds);
-    const newUser = new User({
-      email: userParams.email,
-      name: userParams.name,
-      registrationDate: moment().format("YYYY-MM-DD HH:mm:ss"),
-      salt: salt,
-      password: bcrypt.hashSync(userParams.password, salt),
-    });
-    // save new user
     try {
-      const user = await userService.addUser(newUser);
-      res.status(200).json({ user: user });
-    } catch (err) {
-      res.status(400).json({ error: ` ${err}` });
-      return;
+      const salt = await bcrypt.genSalt(saltRounds);
+      const hashedPassword = await bcrypt.hash(userParams.password, salt);
+      userParams.password = hashedPassword;
+    } catch (error) {
+      return res.status(400).json({ error: "Password hashing failed" });
     }
+    userParams.registerationDate = moment().format("YYYY-MM-DD HH:mm:ss");
+    const newUser = await userService.addUser(userParams);
+    // remove password from response
+    newUser.password = undefined;
+    res.status(200).json({ user: newUser });
   },
-  async signIn(req, res) {
+  async login(req, res) {
+    logger.info(`[login] - ${path.basename(__filename)}`);
     const userParams = req.body;
-    const email = userParams.email;
-    const password = userParams.password;
-    // check if user exist
-    try {
-      const user = await userService.getUserByEmail(email);
-      if (!user) {
-        res.status(400).json({ error: `User does not exist` });
-        return;
-      }
-    } catch (err) {
-      res.status(500).json({ error: `Error get user: ${email} : ${err}` });
-      return;
+    const user = await userService.getUserByEmail(userParams.email);
+    if (!user) {
+      return res.status(400).json({ error: "Email or password is incorrect" });
     }
-    // if user exist, check password
     try {
-      const user = await userService.getUserByEmail(email);
-      const hash = bcrypt.hashSync(password, user.salt);
-      if (hash === user.password) {
-        res.status(200).json({ user: user });
-      } else {
-        res.status(400).json({ error: `Wrong password` });
+      const isPasswordValid = await bcrypt.compare(
+        userParams.password,
+        user.password
+      );
+      if (!isPasswordValid) {
+        return res
+          .status(400)
+          .json({ error: "Email or password is incorrect" });
       }
-    } catch (err) {
-      res.status(500).json({ error: `Error get user: ${email} : ${err}` });
-      return;
+    } catch (error) {
+      return res.status(400).json({ error: "Password hashing failed" });
     }
+    const token = user.generateAuthToken();
+    res.status(200).json({ token: token });
+  },
+  async logout(req, res) {
+    logger.info(`[logout] - ${path.basename(__filename)}`);
+    const user = req.user;
+    user.token = null;
+    user.tokenExp = null;
+    await user.save();
+    res.status(200).json({ message: "Logged out" });
+  },
+  async refreshToken(req, res) {
+    logger.info(`[refreshToken] - ${path.basename(__filename)}`);
+    const user = req.user;
+    const token = user.generateAuthToken();
+    res.status(200).json({ token: token });
   },
 };
