@@ -1,10 +1,14 @@
 const { Schema, model } = require("mongoose");
 const mongoose = require("mongoose");
 const jwt = require("jsonwebtoken");
+const validator = require('validator');
 
 const userSchema = new Schema(
   {
-    email: { type: String, required: true },
+    email: { type: String, required: true ,
+      validate: validator.isEmail ,
+      message: 'Please provide a valid email',
+    },
     name: { type: String, required: true },
     projectsRefs: [
       {
