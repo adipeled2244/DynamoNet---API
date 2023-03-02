@@ -4,6 +4,7 @@ const path = require("path");
 const { spawn } = require("child_process");
 const { isErrored } = require("stream");
 const timeRangeService = require("../services/timeRangeService");
+const { ProjectStatus } = require("../constants");
 
 exports.timeRangeController = {
   async getTimeRange(req, res) {
@@ -73,6 +74,9 @@ exports.timeRangeController = {
     }
     try {
       const { projectId, networkId, edgeType, timeWindows } = timeRangeParams;
+      await projectService.updateProject(projectId, {
+        status: ProjectStatus.CREATING_TIME_RANGES,
+      });
       const favoriteNodes = await projectService.getFavoriteNodes(projectId);
 
       const pythonProcess = spawn(

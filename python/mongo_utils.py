@@ -610,7 +610,10 @@ def create_multiple_time_ranges(project_id, network_id, edgeType, time_windows, 
             node_metrics = metrics_utils.calculateNodeMetrics(time_range.network, node_id)
             time_range.network.nodeMetrics[node_id] = node_metrics
         print('saving time range')
-        time_range.title = 'time range {}'.format(index)
+        if 'title' in time_window:
+            time_range.title = time_window['title']
+        else:
+            time_range.title = 'time range {}'.format(index)
         index += 1
         save_time_range(time_range, project_id, mongo)
         time_ranges.append(time_range)

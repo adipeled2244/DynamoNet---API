@@ -227,8 +227,9 @@ def import_data(project_id, limit=None, db_name='test'):
     replace_source_ids_with_users(quoteNetwork, source_users_dict)
     
     # add missing users to quote network's nodes
-    for user in missing_source_users_dict.values():
-        quoteNetwork.nodes.add(user.screen_name)
+    for edge in quoteNetwork.edges:
+        quoteNetwork.nodes.add(edge.source)
+        quoteNetwork.nodes.add(edge.destination)
 
     # calculate network metrics
     quoteNetworkMetrics = metrics_utils.calculateNetworkMetrics(quoteNetwork)

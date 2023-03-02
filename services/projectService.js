@@ -49,6 +49,10 @@ async function updateProject(id, params) {
     project.favoriteNodes = params.favoriteNodes;
     project.markModified("favoriteNodes");
   }
+  if (params.status) {
+    project.status = params.status;
+    project.markModified("status");
+  }
   await project.save();
   return project;
 }

@@ -9,6 +9,7 @@ def main(args):
     js_date_format = '%Y-%m-%dT%H:%M:%S.%fZ'
     print('Creating multiple time ranges for project: ' + args.project_id + ' and network: ' + args.network_id)
     args.time_windows = [{
+        'title': time_window['title'] if 'title' in time_window else None,
         'start_date': datetime.datetime.strptime(time_window['startDate'], js_date_format),
         'end_date': datetime.datetime.strptime(time_window['endDate'], js_date_format)
     } for time_window in args.time_windows]
