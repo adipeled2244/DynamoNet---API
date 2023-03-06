@@ -19,6 +19,7 @@
     "homepage": "https://github.com/DCS-Shenkar-2022/assignment-9---ex2-express-mongo-heroku-adipeled2244#readme",
     "dependencies": {
         "@sendgrid/mail": "^7.7.0",
+        "JSONStream": "^1.3.5",
         "axios": "^0.24.0",
         "bcrypt": "^5.1.0",
         "child_process": "^1.0.2",
