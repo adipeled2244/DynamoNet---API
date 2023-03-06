@@ -158,14 +158,15 @@ exports.projectController = {
     try {
       const project = await projectService.getProject(projectIdParam, false);
       if (!project) {
-        return res.status(404).json({ error: "Project id not found" });
+        return res.status(404).json({ error: "Project not found" });
       }
       const node = await networkService.getNode(
         project.sourceNetwork,
         usernameParam
       );
       if (!node) {
-        return res.status(404).json({ error: "Node not found" });
+        //not fount in the project
+        return res.status(404).json({ error: "Node name not correct" });
       }
       const nodeAlreadyExist = await projectService.getFavoriteNode(
         projectIdParam,
@@ -178,7 +179,7 @@ exports.projectController = {
         );
       } else {
         return res.status(404).json({
-          error: "twitter usesrname already exist in favoriteNodes array",
+          error: `Username : ${usernameParam} already exist in favorite Nodes`,
         });
       }
     } catch (err) {
