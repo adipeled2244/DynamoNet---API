@@ -1,4 +1,5 @@
 const projectService = require("../services/projectService");
+const networkService = require("../services/networkService");
 const logger = require("../helpers/winston");
 const path = require("path");
 const { spawn } = require("child_process");
@@ -155,19 +156,16 @@ exports.projectController = {
     const usernameParam = req.params.username;
     let addResult;
     try {
-      const nodeAlreadyExist = await projectService.getFavoriteNode(
-        projectIdParam,
+      const project = await projectService.getProject(projectIdParam, false);
+      if (!project) {
+        return res.status(404).json({ error: "Project id not found" });
+      }
+      const node = await networkService.getNode(
+        project.sourceNetwork,
         usernameParam
       );
-      if (!nodeAlreadyExist) {
-        addResult = await projectService.addFavoriteNode(
-          projectIdParam,
-          usernameParam
-        );
-      } else {
-        return res.status(404).json({
-          error: "twitter usesrname already exist in favoriteNodes array",
-        });
+      if (!node) {
+        return res.status(404).json({ error: "Node not found" });
       }
     } catch (err) {
       res.status(500).json({

@@ -10,6 +10,7 @@ module.exports = {
   getNetwork,
   getNetworks,
   deleteNetwork,
+  getNode,
 };
 async function addNetwork(params) {
   logger.info(`[addNetwork] - ${path.basename(__filename)}`);
@@ -40,13 +41,25 @@ async function getNetworks() {
 
 async function deleteNetwork(networkId) {
   logger.info(`[deleteNetwork] - ${path.basename(__filename)}`);
-    const network = await getNetwork(networkId);
-    if (!network) {
-      throw Error(`Network id : ${networkId} not found`);
-    }
-    const networkEdges = network.edges;
-    await Edge.deleteMany({ _id: { $in: networkEdges } });
-    await Network.deleteOne({ _id: networkId });
+  const network = await getNetwork(networkId);
+  if (!network) {
+    throw Error(`Network id : ${networkId} not found`);
+  }
+  const networkEdges = network.edges;
+  await Edge.deleteMany({ _id: { $in: networkEdges } });
+  await Network.deleteOne({ _id: networkId });
 }
 
-
+async function getNode(networkId, node) {
+  logger.info(`[getNode] - ${path.basename(__filename)}`);
+  const network = await Network.findOne({ _id: networkId }, { nodes: 1 });
+  if (!network) {
+    throw Error(`Network id : ${networkId} not found`);
+  }
+  const networkNodes = network.nodes;
+  const nodeIndex = networkNodes.findIndex((n) => n === node);
+  if (nodeIndex === -1) {
+    throw Error(`Node : ${node} not found`);
+  }
+  return networkNodes[nodeIndex];
+}
