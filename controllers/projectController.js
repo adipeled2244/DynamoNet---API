@@ -167,6 +167,20 @@ exports.projectController = {
       if (!node) {
         return res.status(404).json({ error: "Node not found" });
       }
+      const nodeAlreadyExist = await projectService.getFavoriteNode(
+        projectIdParam,
+        usernameParam
+      );
+      if (!nodeAlreadyExist) {
+        addResult = await projectService.addFavoriteNode(
+          projectIdParam,
+          usernameParam
+        );
+      } else {
+        return res.status(404).json({
+          error: "twitter usesrname already exist in favoriteNodes array",
+        });
+      }
     } catch (err) {
       res.status(500).json({
         error: `Error add new favorite node ${projectIdParam} , node: ${usernameParam}: ${err}`,
