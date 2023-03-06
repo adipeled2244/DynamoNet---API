@@ -238,6 +238,18 @@ class MongoWrapper:
                         'bsonType': 'array',
                         'description': 'must be an array and is required',
                     },
+                    'retweetCommunities': {
+                        'bsonType': 'array',
+                        'description': 'must be an array',
+                    },
+                    'quoteCommunities': {
+                        'bsonType': 'array',
+                        'description': 'must be an array',
+                    },
+                    'communities': {
+                        'bsonType': 'array',
+                        'description': 'must be an array',
+                    },
                     'edges': {
                         'bsonType': 'array',
                         'description': 'must be an array and is required',
@@ -261,6 +273,9 @@ class MongoWrapper:
             "quoteNetworkMetrics" : network.quoteNetworkMetrics,
             "nodeMetrics" : network.nodeMetrics,
             "nodes" : [ str(node) for node in network.nodes ],
+            "retweetCommunities": network.retweetCommunities,
+            "quoteCommunities": network.quoteCommunities,
+            "communities": network.communities,
             "edges" : [ ObjectId(edge_id) for edge_id in edges_object_ids ]
         })
 
@@ -602,9 +617,12 @@ def create_multiple_time_ranges(project_id, network_id, edgeType, time_windows, 
             quoteNetworkMetrics = metrics_utils.calculateNetworkMetrics(quote_time_range.network)
             time_range.network.retweetNetworkMetrics = retweetNetworkMetrics
             time_range.network.quoteNetworkMetrics = quoteNetworkMetrics
+            time_range.network.retweetCommunities = metrics_utils.getCommunities(retweet_time_range.network)
+            time_range.network.quoteCommunities = metrics_utils.getCommunities(quote_time_range.network)
         print('calculating network metrics')
         networkMetrics = metrics_utils.calculateNetworkMetrics(time_range.network)
         time_range.network.networkMetrics = networkMetrics
+        time_range.network.communities = metrics_utils.getCommunities(time_range.network)
         print('calculating node metrics')
         for node_id in favorite_nodes:
             node_metrics = metrics_utils.calculateNodeMetrics(time_range.network, node_id)

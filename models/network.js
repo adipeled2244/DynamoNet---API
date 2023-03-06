@@ -7,6 +7,9 @@ const networkSchema = new Schema(
     quoteNetworkMetrics: { type: Map, of: Object },
     nodeMetrics: { type: Map, of: Object },
     nodes: { type: [String], required: true },
+    retweetCommunities: { type: Map, of: Array, default: {} },
+    quoteCommunities: { type: Map, of: Array, default: {} },
+    communities: { type: Map, of: Array, default: {} },
     edges: [{ type: Schema.Types.ObjectId, ref: "Edge" }],
   },
   { collection: "networks" }

@@ -116,3 +116,19 @@ def calculateNodeMetrics(network, node) -> dict:
 
     }
     return node_metrics
+
+
+## Community detection
+def communityDetection(graph):
+    communities = graph.community_leiden(resolution_parameter=0.5, objective_function="modularity")
+    return communities
+
+def communitiesToList(communities, graph):
+    # return {f'{i}': list(community) for i, community in enumerate(communities)}
+    return {f'{i}': [graph.vs[node]["name"] for node in community] for i, community in enumerate(communities)}
+
+def getCommunities(network):
+    graph = createGraph(network)
+    communities = communityDetection(graph)
+    communities_list = communitiesToList(communities, graph)
+    return communities_list
