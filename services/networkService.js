@@ -59,7 +59,7 @@ async function getNode(networkId, node) {
   const networkNodes = network.nodes;
   const nodeIndex = networkNodes.findIndex((n) => n === node);
   if (nodeIndex === -1) {
-    throw Error(`Node : ${node} not found`);
+    return undefined;
   }
   return networkNodes[nodeIndex];
 }

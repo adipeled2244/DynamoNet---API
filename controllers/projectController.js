@@ -164,8 +164,7 @@ exports.projectController = {
         project.sourceNetwork,
         usernameParam
       );
-      if (!node) {
-        //not fount in the project
+      if (!node) {       
         return res.status(404).json({ error: `Username: ${usernameParam} not found in this project` });
       }
       const nodeAlreadyExist = await projectService.getFavoriteNode(
@@ -184,7 +183,7 @@ exports.projectController = {
       }
     } catch (err) {
       res.status(500).json({
-        error: `Cannot add new favorite node: ${usernameParam} `,
+        error: `Cannot add new favorite node, please try again later.`,
       });
       return;
     }

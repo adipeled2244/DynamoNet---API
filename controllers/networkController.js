@@ -19,7 +19,7 @@ exports.networkController = {
     } catch (err) {
       res
         .status(500)
-        .send({ error: `Error get Network: ${networkIdParam} : ${err}` });
+        .send({ error: `Cannot get network, pleas try again later` });
       return;
     }
   },
