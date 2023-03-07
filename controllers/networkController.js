@@ -36,7 +36,6 @@ exports.networkController = {
     }
   },
 
-<<<<<<< HEAD
     async getNetwork(req, res) {
         logger.info(`[getNetwork] - ${path.basename(__filename)}`);
         let network;
@@ -44,13 +43,7 @@ exports.networkController = {
         try {
             network = await networkService.getNetwork(networkIdParam);
             if(network){
-                const JSONStream = require('JSONStream');
-                const largeJsonObject = network;
-                const jsonStream = JSONStream.stringify();
-                jsonStream.write(largeJsonObject);
-                jsonStream.pipe(res);
-                return;
-            //return res.status(200).json({network})
+            return res.status(200).json({network})
             }
             else{
                 return res.status(404).json({ error: "Cannot get network : network not found" });
@@ -85,32 +78,6 @@ exports.networkController = {
             return;
         }
     },
-=======
-  async getNetworks(req, res) {
-    logger.info(`[getNetworks] - ${path.basename(__filename)}`);
-    let networks;
-    try {
-      networks = await networkService.getNetworks();
-      res.status(200).json({ networks });
-    } catch (err) {
-      res.status(500).json({ error: `Error get networks : ${err}` });
-      return;
-    }
-  },
-
-  //TO DO: Change according to noor
-  async addNetwork(req, res) {
-    logger.info(`[addNetwork] - ${path.basename(__filename)}`);
-    const networkParams = req.body;
-    try {
-      const newNetwork = await networkService.addNetwork(networkParams);
-      res.status(200).json({ network: newNetwork });
-    } catch (err) {
-      res.status(400).json({ error: ` ${err}` });
-      return;
-    }
-  },
->>>>>>> 44dc92513dc9a0458c46cc3aa05d988637f8a1c7
 
   async updateNetwork(req, res) {
     logger.info(`[updateNetwork] - ${path.basename(__filename)}`);
