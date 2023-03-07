@@ -2,7 +2,6 @@ const networkService = require("../services/networkService");
 const logger = require("../helpers/winston");
 const path = require("path");
 var bodyParser = require("body-parser");
-const { JSONStreamStringify } = require("json-stream-stringify");
 const jsonParser = bodyParser.json();
 
 exports.networkController = {
@@ -13,17 +12,6 @@ exports.networkController = {
     try {
       network = await networkService.getNetwork(networkIdParam);
       if (network) {
-        // const JSONStream = require("JSONStream");
-        // const largeJsonObject = network;
-        // const jsonStream = JSONStream.stringify();
-        // jsonStream.write(largeJsonObject);
-        // jsonStream.pipe(res);
-        // return res.end();
-        // res.type("application/json");
-        // const networkString = JSON.stringify(network);
-        // res.write(networkString);
-        // res.status(200);
-        // res.end();
         return res.status(200).json({ network });
       } else {
         return res.status(404).json({ error: "Network id not found" });
