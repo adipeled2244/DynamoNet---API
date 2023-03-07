@@ -12,10 +12,10 @@ exports.nodeController = {
       if (node) {
         return res.status(200).json({ node });
       } else {
-        return res.status(404).json({ error: "Node id not found" });
+        return res.status(404).json({ error: `Cannot get node, node ${screenName} not found` });
       }
     } catch (err) {
-      res.status(500).send({ error: `Error get node: ${screenName} : ${err}` });
+      res.status(500).send({ error: `Cannot get node: ${screenName}, please try again later` });
       return;
     }
   },
@@ -24,7 +24,7 @@ exports.nodeController = {
     logger.info(`[getNodes] - ${path.basename(__filename)}`);
     const ids = req.query.ids;
     if (!ids || ids.length == 0) {
-      return res.status(400).json({ error: "No ids provided" });
+      return res.status(400).json({ error: "Cannot get nodes: No nodes were provided" });
     }
     const screenNames = ids.split(",");
     let nodes;
@@ -32,12 +32,11 @@ exports.nodeController = {
       nodes = await nodeService.getNodes(screenNames);
       res.status(200).json({ nodes });
     } catch (err) {
-      res.status(500).json({ error: `Error get nodes : ${err}` });
+      res.status(500).json({ error: `Cannot get nodes, please try again later` });
       return;
     }
   },
 
-  //TO DO: Change according to noor
   async addNode(req, res) {
     logger.info(`[addNode] - ${path.basename(__filename)}`);
     const nodeParams = req.body;
@@ -46,7 +45,7 @@ exports.nodeController = {
       const newNode = await nodeService.addNode(nodeParams);
       res.status(200).json({ node: newNode });
     } catch (err) {
-      res.status(400).json({ error: ` ${err}` });
+      res.status(500).json({ error: `Cannot add new node, please try again later` });
       return;
     }
   },
@@ -61,12 +60,12 @@ exports.nodeController = {
       if (updateResult.matchedCount == 1) {
         return res.status(200).json({ message: "Node updated" });
       } else {
-        return res.status(404).json({ error: "Node id not found" });
+        return res.status(404).json({ error: "Cannot update node: Node not found" });
       }
     } catch (err) {
       res
         .status(500)
-        .json({ error: `Error update node ${nodeIdParam} : ${err}` });
+        .json({ error: `Cannot update this node, please try again later` });
       return;
     }
   },
@@ -80,7 +79,7 @@ exports.nodeController = {
     } catch (err) {
       res
         .status(500)
-        .json({ error: `Error deleting node ${nodeIdParam} : ${err}` });
+        .json({ error: `Cannot delete this node, please try again later` });
       return;
     }
   },

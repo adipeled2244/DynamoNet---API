@@ -20,10 +20,10 @@ exports.networkController = {
             //return res.status(200).json({network})
             }
             else{
-                return res.status(404).json({ error: "Network id not found" });
+                return res.status(404).json({ error: "Cannot get network : network not found" });
             }
         } catch (err) {
-            res.status(500).send({ error: `Error get Network: ${networkIdParam} : ${err}` });
+            res.status(500).send({ error: `Cannot get network, please try again later` });
             return;
         }
     },
@@ -35,7 +35,7 @@ exports.networkController = {
             networks = await networkService.getNetworks();
             res.status(200).json({networks})
         } catch (err) {
-            res.status(500).json({ error: `Error get networks : ${err}` });
+            res.status(500).json({ error: `Cannot get networks, please try again later` });
             return;
         }
     },
@@ -48,7 +48,7 @@ exports.networkController = {
             const newNetwork = await networkService.addNetwork(networkParams);                        
             res.status(200).json({network: newNetwork});
         } catch (err) {
-            res.status(400).json({ error: ` ${err}` });
+            res.status(500).json({ error: `Cannot add new network, please try again later` });
             return;
         }
     },
@@ -64,10 +64,10 @@ exports.networkController = {
             if (updateResult.matchedCount == 1) {
                 return res.status(200).json({ message:"Network updated"});
             } else {
-                return res.status(404).json({ error: "Network id not found" });
+                return res.status(404).json({ error: "Cannot update network: network not found" });
             }
         } catch (err) {
-            res.status(500).json({ error: `Error update network ${networkIdParam} : ${err}` });
+            res.status(500).json({ error: `Cannot update network, please try again later` });
             return;
         }
 
@@ -80,7 +80,7 @@ exports.networkController = {
             deleteResult = await networkService.deleteNetwork(networkIdParam);
             return  res.status(200).json({ message: `Network deleted` });
         } catch (err) {
-            res.status(500).json({ error: `Error deleting Network ${networkIdParam} : ${err}` });
+            res.status(500).json({ error: `Cannot delete network, please try again later` });
             return;
         }
     },
@@ -92,7 +92,7 @@ exports.networkController = {
     let network;
     network = await networkService.getNetwork(networkIdParam);
     if(!network){
-        return res.status(404).json({ error: "Network id not found" });
+        return res.status(404).json({ error: `Cannot get network's edges` });
     }
     networkEdges=network.edges;
     try {
@@ -101,7 +101,7 @@ exports.networkController = {
       })
       res.status(200).json({filterEdges})
     } catch (err) {
-        res.status(500).json({ error: `Error get edges from type ${type} for projectId ${projectIdParam} : ${err}` });
+        res.status(500).json({ error: `Cannot get network's edges, please try again later` });
         return;
     }
 },

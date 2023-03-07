@@ -16,12 +16,12 @@ exports.timeRangeController = {
       if (timeRange) {
         return res.status(200).json({ timeRange });
       } else {
-        return res.status(404).json({ error: "TimeRange id not found" });
+        return res.status(404).json({ error: "Cannot get time range: time range not found" });
       }
     } catch (err) {
       res
         .status(500)
-        .send({ error: `Error get timeRange: ${timeRangeIdParam} : ${err}` });
+        .send({ error: `Cannot get time range, please try again later` });
       return;
     }
   },
@@ -36,12 +36,12 @@ exports.timeRangeController = {
       if (timeRange) {
         return res.status(200).json({ timeRange });
       } else {
-        return res.status(404).json({ error: "TimeRange id not found" });
+        return res.status(404).json({ error: "Cannot get time range: time range not found" });
       }
     } catch (err) {
       res
         .status(500)
-        .send({ error: `Error get timeRange: ${timeRangeIdParam} : ${err}` });
+        .send({ error: `Cannot get time range, please try again later` });
       return;
     }
   },
@@ -52,7 +52,7 @@ exports.timeRangeController = {
       timeRanges = await timeRangeService.getTimeRanges();
       res.status(200).json({ timeRanges });
     } catch (err) {
-      res.status(500).json({ error: `Error get timeRanges : ${err}` });
+      res.status(500).json({ error: `Cannot get time ranges, please try again later` });
       return;
     }
   },
@@ -70,7 +70,7 @@ exports.timeRangeController = {
     const timeRangeParams = req.body;
 
     if (!timeRangeParams) {
-      res.status(400).send({ error: "invalid params" });
+      res.status(400).send({ error: "Cannot add new time range: invalid params sent" });
     }
     try {
       const { projectId, networkId, edgeType, timeWindows } = timeRangeParams;
@@ -107,7 +107,7 @@ exports.timeRangeController = {
       });
       res.status(200).json({ message: "Data processing " });
     } catch (err) {
-      res.status(400).json({ error: ` ${err}` });
+      res.status(400).json({ error: `Cannot add new time ranges, please try again later` });
       return;
     }
   },
@@ -127,7 +127,7 @@ exports.timeRangeController = {
       return res.status(200).json({ message: `Time Range deleted` });
     } catch (err) {
       res.status(500).json({
-        error: `Error deleting time range ${timeRangeIdParam} for project ${projectIdParam} : ${err}`,
+        error: `Cannot delete time range, please try again later`,
       });
       return;
     }
@@ -137,7 +137,7 @@ exports.timeRangeController = {
     const projectId = req.body.projectId;
     const timeRanges = req.body.timeRanges;
     if (!timeRanges || !projectId) {
-      res.status(400).send({ error: "invalid params" });
+      res.status(400).send({ error: "Cannot delete time ranges: invalid params sent" });
     }
     let deleteResult;
     try {
@@ -148,7 +148,7 @@ exports.timeRangeController = {
       return res.status(200).json({ message: `Time Ranges deleted` });
     } catch (err) {
       res.status(500).json({
-        error: `Error deleting time ranges for project ${projectId} : ${err}`,
+        error: `Cannot delete time ranges, please try again later`,
       });
       return;
     }
@@ -159,7 +159,7 @@ exports.timeRangeController = {
     const timeRangeIdParam = req.params.timeRangeId;
     const projectIdParam = req.params.projectId;
     if (!timeRangeParams || !timeRangeIdParam || !projectIdParam) {
-      res.status(400).send({ error: "invalid params" });
+      res.status(400).send({ error: "Cannot update time range: invalid params sent" });
     }
     let updateResult;
     try {
@@ -171,7 +171,7 @@ exports.timeRangeController = {
       return res.status(200).json({ message: `Time Range updated` });
     } catch (err) {
       res.status(500).json({
-        error: `Error updating time range ${timeRangeIdParam} for project ${projectIdParam} : ${err}`,
+        error: `Cannot update time range, please try again later`,
       });
       return;
     }

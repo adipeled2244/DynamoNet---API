@@ -17,12 +17,12 @@ exports.projectController = {
       if (project) {
         return res.status(200).json({ project });
       } else {
-        return res.status(404).json({ error: "Project id not found" });
+        return res.status(404).json({ error: "Cannot get project: project not found" });
       }
     } catch (err) {
       res
         .status(500)
-        .send({ error: `Error get project: ${projectIdParam} : ${err}` });
+        .send({ error: `Cannot get project, please try again later` });
       return;
     }
   },
@@ -34,7 +34,7 @@ exports.projectController = {
       res.status(200).json({ projects });
       return;
     } catch (err) {
-      res.status(500).json({ error: `Error get projects : ${err}` });
+      res.status(500).json({ error: `Cannot get projects, please try again later` });
       return;
     }
   },
@@ -58,7 +58,7 @@ exports.projectController = {
     const userId = projectParams.userId;
     const userEmail = projectParams.userEmail;
     if (!projectParams) {
-      res.status(400).send({ error: "invalid params" });
+      res.status(400).send({ error: "Cannot add new project: invalid params sent" });
     }
     projectParams.createdDate = Date.now();
     if (
@@ -108,7 +108,7 @@ exports.projectController = {
 
       res.status(200).json({ project: newProject });
     } catch (err) {
-      res.status(400).json({ error: ` ${err}` });
+      res.status(400).json({ error: "Cannot add new project, please try again" });
       return;
     }
   },
@@ -126,12 +126,12 @@ exports.projectController = {
       if (project) {
         return res.status(200).json({ project });
       } else {
-        return res.status(404).json({ error: "Project id not found" });
+        return res.status(404).json({ error: "Cannot update project: project not found" });
       }
     } catch (err) {
       res
         .status(500)
-        .json({ error: `Error update project ${projectIdParam} : ${err}` });
+        .json({ error: `Cannot update project, please try again later` });
       return;
     }
   },
@@ -141,11 +141,11 @@ exports.projectController = {
     let deleteResult;
     try {
       //deleteResult = await projectService.deleteProject(projectIdParam);
-      return res.status(200).json({ message: `Project deleted` });
+      return res.status(200).json({ message: `Project deleted successfully` });
     } catch (err) {
       res
         .status(500)
-        .json({ error: `Error deleting project ${projectIdParam} : ${err}` });
+        .json({ error: `Cannot delete project, please try again later` });
       return;
     }
   },
@@ -158,7 +158,7 @@ exports.projectController = {
     try {
       const project = await projectService.getProject(projectIdParam, false);
       if (!project) {
-        return res.status(404).json({ error: "Project not found" });
+        return res.status(404).json({ error: "Cannot add new favorite node: Project not found" });
       }
       const node = await networkService.getNode(
         project.sourceNetwork,
@@ -166,7 +166,7 @@ exports.projectController = {
       );
       if (!node) {
         //not fount in the project
-        return res.status(404).json({ error: "Node name not correct" });
+        return res.status(404).json({ error: `Username: ${usernameParam} not found in this project` });
       }
       const nodeAlreadyExist = await projectService.getFavoriteNode(
         projectIdParam,
@@ -184,7 +184,7 @@ exports.projectController = {
       }
     } catch (err) {
       res.status(500).json({
-        error: `Error add new favorite node ${projectIdParam} , node: ${usernameParam}: ${err}`,
+        error: `Cannot add new favorite node: ${usernameParam} `,
       });
       return;
     }
@@ -216,12 +216,12 @@ exports.projectController = {
     });
 
     if (addResult.matchedCount == 1) {
-      return res.status(200).json({ message: "favorite updated" });
+      return res.status(200).json({ message: "New favorite node added" });
     } else {
       return res
         .status(404)
-        .json({ error: "ProjectId or Favorite node not found" });
-    }
+        .json({ error: `Cannot add new favorite node: ${usernameParam}, please try again later` });
+    } //ProjectId or Favorite node not found
   },
 
   async removeFavoriteNode(req, res) {
@@ -247,7 +247,7 @@ exports.projectController = {
       [deleteResultA] = await Promise.all(deletePromises);
     } catch (err) {
       res.status(500).json({
-        error: `Error remove node ${projectIdParam} , node: ${usernameParam}: ${err}`,
+        error: `Cannot remove node :${usernameParam} from favorite node list  `,
       });
       return;
     }
@@ -255,7 +255,7 @@ exports.projectController = {
     if (deleteResultA.matchedCount == 1) {
       return res.status(200).json({ message: "favorite node remove" });
     } else {
-      return res.status(404).json({ error: "ProjectId or username not found" });
+      return res.status(404).json({ error: `Cannot remove node ${usernameParam} from favorite node list. ` });
     }
   },
   async getProjectWithTimeRanges(req, res) {
@@ -266,7 +266,7 @@ exports.projectController = {
       project = await projectService.getProjectWithTimeRanges(projectIdParam);
     } catch (err) {
       res.status(500).json({
-        error: `Error get project ${projectIdParam} : ${err}`,
+        error: `Cannot get this project, please try again later`,
       });
       return;
     }
@@ -274,7 +274,7 @@ exports.projectController = {
     if (project) {
       return res.status(200).json({ project: project });
     } else {
-      return res.status(404).json({ error: "ProjectId not found" });
+      return res.status(404).json({ error: "Project not found" });
     }
   },
 };
