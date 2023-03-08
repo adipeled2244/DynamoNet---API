@@ -11,6 +11,7 @@ const networkSchema = new Schema(
     quoteCommunities: { type: Map, of: Array, default: {} },
     communities: { type: Map, of: Array, default: {} },
     edges: [{ type: Schema.Types.ObjectId, ref: "Edge" }],
+    nodePositions: { type: Map, of: Object },
   },
   { collection: "networks" }
 );
