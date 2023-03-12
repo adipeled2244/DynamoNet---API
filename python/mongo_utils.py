@@ -234,10 +234,6 @@ class MongoWrapper:
                         'bsonType': 'object',
                         'description': 'must be an object'
                     },
-                    'nodes': {
-                        'bsonType': 'array',
-                        'description': 'must be an array and is required',
-                    },
                     'retweetCommunities': {
                         'bsonType': 'array',
                         'description': 'must be an array',
@@ -249,6 +245,14 @@ class MongoWrapper:
                     'communities': {
                         'bsonType': 'array',
                         'description': 'must be an array',
+                    },
+                    'nodes': {
+                        'bsonType': 'array',
+                        'description': 'must be an array',
+                    },
+                    'nodePositions': {
+                        'bsonType': 'object',
+                        'description': 'must be an object',
                     },
                     'edges': {
                         'bsonType': 'array',
@@ -272,10 +276,11 @@ class MongoWrapper:
             "retweetNetworkMetrics" : network.retweetNetworkMetrics,
             "quoteNetworkMetrics" : network.quoteNetworkMetrics,
             "nodeMetrics" : network.nodeMetrics,
-            "nodes" : [ str(node) for node in network.nodes ],
             "retweetCommunities": network.retweetCommunities,
             "quoteCommunities": network.quoteCommunities,
             "communities": network.communities,
+            "nodes" : [ str(node) for node in network.nodes ],
+            "nodePositions" : network.nodePositions,
             "edges" : [ ObjectId(edge_id) for edge_id in edges_object_ids ]
         })
 
@@ -559,6 +564,16 @@ def mongo_network_to_network(mongo_network, mongo):
         network.quoteNetworkMetrics = mongo_network['quoteNetworkMetrics']
     if 'nodeMetrics' in mongo_network:
         network.nodeMetrics = mongo_network['nodeMetrics']
+    if 'nodes' in mongo_network:
+        network.nodes = mongo_network['nodes']
+    if 'retweetCommunities' in mongo_network:
+        network.retweetCommunities = mongo_network['retweetCommunities']
+    if 'quoteCommunities' in mongo_network:
+        network.quoteCommunities = mongo_network['quoteCommunities']
+    if 'communities' in mongo_network:
+        network.communities = mongo_network['communities']
+    if 'nodePositions' in mongo_network:
+        network.nodePositions = mongo_network['nodePositions']
     return network
 
 

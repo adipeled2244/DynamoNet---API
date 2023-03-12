@@ -62,10 +62,11 @@ class Network:
         }
         self.nodeMetrics = {
         }
-        self.nodes = set()
         self.retweetCommunities = []
         self.quoteCommunities = []
         self.communities = []
+        self.nodes = set()
+        self.nodePositions = {}
         self.edges = [] 
 
 class Edge:
