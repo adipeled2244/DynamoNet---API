@@ -253,3 +253,25 @@ def import_data(project_id, limit=None, db_name='test'):
 
     # insert network id into project
     mongo_utils.insert_network_to_project(project_id, mergedNetwork_object_id, mongo_host=mongo_host, db_name=db_name)
+
+
+    # 
+    mergedNetwork.retweetCommunities = metrics_utils.getCommunities(retweetNetwork)
+    mergedNetwork.quoteCommunities = metrics_utils.getCommunities(quoteNetwork)
+    mergedNetwork.communities = metrics_utils.getCommunities(mergedNetwork)
+
+    try:
+        mongo = MongoWrapper(mongo_host, 'test')
+        networks_collection = mongo.get_collection('networks')
+        networks_collection.update_one({
+                                        '_id': mergedNetwork_object_id,
+                                        },
+                                        {
+                                        '$set': {
+                                            "communities": mergedNetwork.communities,
+                                            "retweetCommunities": mergedNetwork.retweetCommunities,
+                                            "quoteCommunities": mergedNetwork.quoteCommunities,
+                                        }
+                                    })
+    except:
+        print('Error updating communities')
