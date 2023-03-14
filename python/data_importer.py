@@ -46,7 +46,7 @@ def get_users(tweepyWrapper, screen_names):
             )
     return userList
 
-def get_tweets(tweepyWrapper, users, start_date, end_date, limit=None):
+def get_tweets_by_users(tweepyWrapper, users, start_date, end_date, limit=None):
     tweetList = []
     for user in users:
         tweets = tweepyWrapper.get_user_tweets(user.screen_name, start_date, end_date, limit=limit)
@@ -57,6 +57,40 @@ def get_tweets(tweepyWrapper, users, start_date, end_date, limit=None):
                     text=tweet.text,
                     created_at=tweet.created_at,
                     user=user
+                    )
+                )
+    return tweetList
+
+def get_tweets_by_keywords(tweepyWrapper, keywords, start_date, end_date, limit=None):
+    tweetList = []
+    # keyword_query = ' OR '.join(keywords)
+    # concatenate keywords with OR up to 1024 characters
+    # then run query
+    keyword_query = ''
+    for keyword in keywords:
+        if len(keyword_query) + len(keyword) + 4 > 1024:
+            tweets = tweepyWrapper.get_tweets_by_keyword(keyword_query, start_date, end_date, limit=limit)
+            for tweet in tweets:
+                tweetList.append(
+                    Tweet(
+                        id=tweet.id,
+                        text=tweet.text,
+                        created_at=tweet.created_at,
+                        user=tweet.user.id
+                        )
+                    )
+            keyword_query = ''
+        keyword_query += keyword + ' OR '
+    if len(keyword_query) > 0:
+        keyword_query = keyword_query[:-4]
+        tweets = tweepyWrapper.get_tweets_by_keyword(keyword_query, start_date, end_date, limit=limit)
+        for tweet in tweets:
+            tweetList.append(
+                Tweet(
+                    id=tweet.id,
+                    text=tweet.text,
+                    created_at=tweet.created_at,
+                    user=tweet.user.id
                     )
                 )
     return tweetList
@@ -196,6 +230,7 @@ def import_data(project_id, limit=None, db_name='test'):
         return
 
     dataset = project['dataset']
+    keywords = project['keywords']
     startDate = project['startDate']
     endDate = project['endDate']
 
@@ -206,16 +241,34 @@ def import_data(project_id, limit=None, db_name='test'):
     # set up tweepy wrapper
     tweepyWrapper = TweepyWrapper(bearer_token, consumer_key, consumer_secret, access_token, access_token_secret)
 
-    # get initial users
-    initial_users = get_users(tweepyWrapper, dataset)
-    print('Initial users len: ', len(initial_users))
+    initial_users = []
+    tweetList = []
+    if len(dataset) > 0:
+        # get initial users
+        initial_users = get_users(tweepyWrapper, dataset)
+        print('Initial users len: ', len(initial_users))
 
-    # get initial users' tweets
-    tweetList = get_tweets(tweepyWrapper, initial_users, startDate, endDate, limit=limit)
-    print('Tweet list len: ', len(tweetList))
+        # get initial users' tweets
+        tweetList.extend(get_tweets_by_users(tweepyWrapper, initial_users, startDate, endDate, limit=limit))
+        print('Tweet list len by users: ', len(tweetList))
+    
+    if len(keywords) > 0:
+        # get tweets by keywords
+        tweets_by_keyword = get_tweets_by_keywords(tweepyWrapper, keywords, startDate, endDate, limit=limit)
+        print('Tweet list len by keywords: ', len(tweets_by_keyword))
+        user_ids_by_keyword = [tweet.user for tweet in tweets_by_keyword]
+        users_dict = get_users_by_id_from_mongo(user_ids_by_keyword)
+        missing_users = [user_id for user_id in user_ids_by_keyword if user_id not in users_dict]
+        missing_users_dict = get_users_by_id_as_dict(tweepyWrapper, missing_users)
+        users_dict.update(missing_users_dict)
+        for tweet in tweets_by_keyword:
+            tweet.user = users_dict[tweet.user]
+        tweetList.extend(tweets_by_keyword)
+
     if len(tweetList) == 0:
         print('No tweets found')
         return
+
     
     # build retweet network
     retweetNetwork = get_retweets_network(tweepyWrapper, tweetList, startDate, endDate, limit=limit)

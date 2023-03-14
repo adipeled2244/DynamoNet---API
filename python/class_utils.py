@@ -1,7 +1,9 @@
+import time
 import tweepy
 import json
 import datetime
 import pytz
+import sys
 
 import constants
 
@@ -79,11 +81,12 @@ class Edge:
         self._id = _id
 
 class Project:
-    def __init__(self, title, description, dataset, startDate, endDate, edgeType, timeRanges, sourceNetwork, favoriteNodes, status=constants.project_inprogress):
+    def __init__(self, title, description, dataset, keywords, startDate, endDate, edgeType, timeRanges, sourceNetwork, favoriteNodes, status=constants.project_inprogress):
         self.createdDate = datetime.datetime.now(pytz.utc)
         self.title = title
         self.description = description
         self.dataset = dataset
+        self.keywords = keywords
         self.startDate = startDate
         self.endDate = endDate
         self.edgeType = edgeType
@@ -177,6 +180,41 @@ class TweepyWrapper:
                 tweets.append(tweet)
             if limit is not None and len(tweets) >= limit:
                 break
+            # stop when tweet is older than start date
+            if tweet.created_at < start_date:
+                break
+        return tweets
+    
+    def get_tweets_by_keyword(self, keyword, start_date, end_date, limit=None):
+        # convert naive datetime to UTC
+        start_date = start_date.replace(tzinfo=pytz.UTC)
+        end_date = end_date.replace(tzinfo=pytz.UTC)
+        tweets = []
+        fromDate = start_date.strftime('%Y%m%d%H%M')
+        toDate = end_date.strftime('%Y%m%d%H%M')
+        try:
+            for tweet in tweepy.Cursor(self.api.search_30_day, label='development', query=keyword, fromDate=fromDate, toDate=toDate).items():
+                if tweet.created_at >= start_date and tweet.created_at <= end_date:
+                    tweets.append(tweet)
+                if limit is not None and len(tweets) >= limit:
+                    break
+                # Limit requests per minute
+                if len(tweets) % 6 == 0: # make 6 requests per minute
+                    time.sleep(10) # wait for 10 seconds before making another request
+
+                # Implement exponential backoff if rate limit is reached
+                while True:
+                    try:
+                        tweet = next(tweepy.Cursor(self.api.search_30_day, label='development', query=keyword, fromDate=fromDate, toDate=toDate).items())
+                        tweets.append(tweet)
+                        # Wait 5 seconds between requests to stay within rate limit
+                        time.sleep(5)
+                        break
+                    except tweepy.RateLimitError:
+                        print("Rate limit reached. Waiting...", file=sys.stderr)
+                        time.sleep(60) # wait for 1 minute before trying again
+        except:
+            print("Error: 30 day search limit reached", file=sys.stderr)
         return tweets
 
 # Parse user data into a list of users

@@ -346,6 +346,10 @@ class MongoWrapper:
                             'bsonType': 'string',
                         }
                     },
+                    'keywords': {
+                        'bsonType': 'array',
+                        'description': 'must be an array',
+                    },
                     'startDate': {
                         'bsonType': 'date',
                         'description': 'must be a date and is required',
@@ -399,6 +403,7 @@ class MongoWrapper:
             "title" : project.title,
             "description" : project.description,
             "dataset" : project.dataset,
+            "keywords" : project.keywords,
             "startDate" : project.startDate,
             "endDate" : project.endDate,
             "edgeType" : project.edgeType,
