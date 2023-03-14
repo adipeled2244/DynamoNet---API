@@ -119,12 +119,11 @@ def merge_Networks(retweetNetwork, quoteNetwork):
 def get_user_ids_from_network_source_nodes(network, exclude_users=None):
     if exclude_users is None:
         exclude_users = []
-    sourceUsers = []
+    source_users = set()
     for edge in network.edges:
-        if edge.source not in sourceUsers and edge.source not in exclude_users:
-            sourceUsers.append(edge.source)
-
-    return sourceUsers
+        if edge.source not in exclude_users:
+            source_users.add(edge.source)
+    return list(source_users)
 
 def get_users_by_id_as_dict(tweepyWrapper, user_ids):
     users = []
@@ -155,6 +154,27 @@ def get_users_by_id_as_dict(tweepyWrapper, user_ids):
             created_at=user.created_at
         )   for user in users
     }
+    return userList
+
+def get_users_by_id_from_mongo(user_ids):
+    mongo = MongoWrapper(mongo_host, 'test')
+    users = mongo.get_users_from_node_collection_by_id(user_ids)
+
+    # create user objects
+    userList = {
+        user['twitterId']: User(
+            id=user['twitterId'],
+            name=user['name'],
+            screen_name=user['screenName'],
+            location=user['location'],
+            description=user['description'],
+            followers_count=user['followersCount'],
+            friends_count=user['friendsCount'],
+            statuses_count=user['statusesCount'],
+            created_at=user['registrationDateTwitter']
+        )   for user in users
+    }
+    mongo.close()
     return userList
 
 def replace_source_ids_with_users(network, user_dict):
@@ -206,7 +226,11 @@ def import_data(project_id, limit=None, db_name='test'):
     print('Source users len: ', len(sourceUsers))
 
     # get users by id
-    source_users_dict = get_users_by_id_as_dict(tweepyWrapper, sourceUsers)
+    source_users_dict = get_users_by_id_from_mongo(sourceUsers)
+    missing_source_users = [user_id for user_id in sourceUsers if user_id not in source_users_dict]
+
+    missing_source_users_dict = get_users_by_id_as_dict(tweepyWrapper, missing_source_users)
+    source_users_dict.update(missing_source_users_dict)
     print('Source users dict len: ', len(source_users_dict))
 
     # replace source ids with user objects
@@ -224,7 +248,10 @@ def import_data(project_id, limit=None, db_name='test'):
     missing_source_users = get_user_ids_from_network_source_nodes(quoteNetwork, exclude_users=sourceUsers)
 
     # get missing users by id
-    missing_source_users_dict = get_users_by_id_as_dict(tweepyWrapper, missing_source_users)
+    missing_source_users_dict = get_users_by_id_from_mongo(missing_source_users)
+    missing_source_users = [user_id for user_id in missing_source_users if user_id not in missing_source_users_dict]
+    missing_source_users_dict2 = get_users_by_id_as_dict(tweepyWrapper, missing_source_users)
+    missing_source_users_dict.update(missing_source_users_dict2)
 
     # updated source_users_dict
     source_users_dict.update(missing_source_users_dict)
