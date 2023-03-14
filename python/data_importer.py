@@ -164,6 +164,11 @@ def replace_source_ids_with_users(network, user_dict):
         except:
             network.edges.remove(edge)
 
+def remove_edges_with_missing_users(network):
+    for edge in network.edges:
+        if type(edge.source) != User or type(edge.destination) != User:
+            network.edges.remove(edge)
+
 def import_data(project_id, limit=None, db_name='test'):
     project = mongo_utils.get_project(project_id, mongo_host=mongo_host, db_name=db_name)
     if project is None:
@@ -206,6 +211,7 @@ def import_data(project_id, limit=None, db_name='test'):
 
     # replace source ids with user objects
     replace_source_ids_with_users(retweetNetwork, source_users_dict)
+    remove_edges_with_missing_users(retweetNetwork)
 
     # calculate retweet network metrics
     retweetNetworkMetrics = metrics_utils.calculateNetworkMetrics(retweetNetwork)
@@ -225,6 +231,7 @@ def import_data(project_id, limit=None, db_name='test'):
 
     # replace source ids with user objects
     replace_source_ids_with_users(quoteNetwork, source_users_dict)
+    remove_edges_with_missing_users(quoteNetwork)
     
     # add missing users to quote network's nodes
     for edge in quoteNetwork.edges:

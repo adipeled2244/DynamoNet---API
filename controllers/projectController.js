@@ -17,7 +17,9 @@ exports.projectController = {
       if (project) {
         return res.status(200).json({ project });
       } else {
-        return res.status(404).json({ error: "Cannot get project: project not found" });
+        return res
+          .status(404)
+          .json({ error: "Cannot get project: project not found" });
       }
     } catch (err) {
       res
@@ -34,7 +36,9 @@ exports.projectController = {
       res.status(200).json({ projects });
       return;
     } catch (err) {
-      res.status(500).json({ error: `Cannot get projects, please try again later` });
+      res
+        .status(500)
+        .json({ error: `Cannot get projects, please try again later` });
       return;
     }
   },
@@ -58,7 +62,9 @@ exports.projectController = {
     const userId = projectParams.userId;
     const userEmail = projectParams.userEmail;
     if (!projectParams) {
-      res.status(400).send({ error: "Cannot add new project: invalid params sent" });
+      res
+        .status(400)
+        .send({ error: "Cannot add new project: invalid params sent" });
     }
     projectParams.createdDate = Date.now();
     if (
@@ -79,7 +85,7 @@ exports.projectController = {
       }
       logger.info(`PYTHON import arguments: ${pythonArguments}`);
       const pythonProcess = spawn(
-        "python",
+        "python3",
         pythonArguments,
         (options = {
           detached: true,
@@ -108,7 +114,9 @@ exports.projectController = {
 
       res.status(200).json({ project: newProject });
     } catch (err) {
-      res.status(400).json({ error: "Cannot add new project, please try again" });
+      res
+        .status(400)
+        .json({ error: "Cannot add new project, please try again" });
       return;
     }
   },
@@ -126,7 +134,9 @@ exports.projectController = {
       if (project) {
         return res.status(200).json({ project });
       } else {
-        return res.status(404).json({ error: "Cannot update project: project not found" });
+        return res
+          .status(404)
+          .json({ error: "Cannot update project: project not found" });
       }
     } catch (err) {
       res
@@ -158,14 +168,20 @@ exports.projectController = {
     try {
       const project = await projectService.getProject(projectIdParam, false);
       if (!project) {
-        return res.status(404).json({ error: "Cannot add new favorite node: Project not found" });
+        return res
+          .status(404)
+          .json({ error: "Cannot add new favorite node: Project not found" });
       }
       const node = await networkService.getNode(
         project.sourceNetwork,
         usernameParam
       );
-      if (!node) {       
-        return res.status(404).json({ error: `Username: ${usernameParam} not found in this project` });
+      if (!node) {
+        return res
+          .status(404)
+          .json({
+            error: `Username: ${usernameParam} not found in this project`,
+          });
       }
       const nodeAlreadyExist = await projectService.getFavoriteNode(
         projectIdParam,
@@ -189,7 +205,7 @@ exports.projectController = {
     }
 
     const pythonProcess = spawn(
-      "python",
+      "python3",
       [
         "./python/add_node_metrics.py",
         `--project_id=${projectIdParam}`,
@@ -219,7 +235,9 @@ exports.projectController = {
     } else {
       return res
         .status(404)
-        .json({ error: `Cannot add new favorite node: ${usernameParam}, please try again later` });
+        .json({
+          error: `Cannot add new favorite node: ${usernameParam}, please try again later`,
+        });
     } //ProjectId or Favorite node not found
   },
 
@@ -254,7 +272,11 @@ exports.projectController = {
     if (deleteResultA.matchedCount == 1) {
       return res.status(200).json({ message: "favorite node remove" });
     } else {
-      return res.status(404).json({ error: `Cannot remove node ${usernameParam} from favorite node list. ` });
+      return res
+        .status(404)
+        .json({
+          error: `Cannot remove node ${usernameParam} from favorite node list. `,
+        });
     }
   },
   async getProjectWithTimeRanges(req, res) {
