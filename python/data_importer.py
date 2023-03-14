@@ -7,6 +7,7 @@
 import pytz
 from config import bearer_token, consumer_key, consumer_secret, access_token, access_token_secret
 from config import mongo_host
+import constants
 
 from class_utils import Project, TimeRange, Network, User, Edge, TweepyWrapper, Tweet
 import mongo_utils
@@ -247,6 +248,8 @@ def import_data(project_id, limit=None, db_name='test'):
         # get initial users
         initial_users = get_users(tweepyWrapper, dataset)
         print('Initial users len: ', len(initial_users))
+        # save initial_users to mongo
+        mongo_utils.save_users(initial_users, mongo_host=mongo_host, db_name=db_name)
 
         # get initial users' tweets
         tweetList.extend(get_tweets_by_users(tweepyWrapper, initial_users, startDate, endDate, limit=limit))
@@ -267,6 +270,8 @@ def import_data(project_id, limit=None, db_name='test'):
 
     if len(tweetList) == 0:
         print('No tweets found')
+        mongo = MongoWrapper(mongo_host, 'test')
+        mongo.update_project_status(project_id, constants.project_ready)
         return
 
     
@@ -328,9 +333,6 @@ def import_data(project_id, limit=None, db_name='test'):
     # calculate network metrics
     mergedNetworkMetrics = metrics_utils.calculateNetworkMetrics(mergedNetwork)
     mergedNetwork.networkMetrics = mergedNetworkMetrics
-
-    # save initial_users to mongo
-    mongo_utils.save_users(initial_users, mongo_host=mongo_host, db_name=db_name)
     
     # save source_users_dict to mongo
     mongo_utils.save_users(list(source_users_dict.values()), mongo_host=mongo_host, db_name=db_name)
