@@ -37,7 +37,7 @@ async function getTimeRangeWithNetwork(timeRangeId) {
 
 async function getTimeRanges() {
   logger.info(`[getTimeRanges] - ${path.basename(__filename)}`);
-  return await TimeRange.find({}).populate("network", "-edges -nodes");
+  return await TimeRange.find({}).populate("network", "-edges -nodes").sort({ startDate: 1, endDate: 1 });
 }
 
 async function deleteTimeRange(timeRangeId, projectId) {

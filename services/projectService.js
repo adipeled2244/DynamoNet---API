@@ -179,5 +179,15 @@ async function getProjectWithTimeRanges(projectId) {
       "-edges -nodes"
     );
   }
+  project.timeRanges.sort((tr1, tr2) => {
+    if (tr1.startDate === tr2.startDate) {
+      return tr1.endDate - tr2.endDate;
+    }
+    else{
+        return tr1.startDate - tr2.startDate;
+  
+    }
+  });
+
   return project;
 }
