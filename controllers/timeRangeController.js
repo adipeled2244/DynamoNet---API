@@ -96,7 +96,7 @@ exports.timeRangeController = {
           `--network_id=${networkId}`,
           `--favorite_nodes=${JSON.stringify(favoriteNodes.favoriteNodes)}`,
           `--edgeType=${edgeType}`,
-          `--edgesTypes=${JSON.stringify(edgeTypes.edgeTypes)}`,
+          `--edgeTypes=${JSON.stringify(edgeTypes.edgeTypes)}`,
           `--time_windows=${JSON.stringify(timeWindows)}`,
         ],
         (options = { detached: true })
