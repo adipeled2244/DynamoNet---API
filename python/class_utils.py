@@ -44,6 +44,7 @@ class Network:
             'reciprocity': None,
             'degreeCentrality': None
         }
+        self.metricsPerEdgeType = {}
         self.retweetNetworkMetrics = {
             'numberOfNodes': None,
             'numberOfEdges': None,
@@ -67,6 +68,7 @@ class Network:
         self.retweetCommunities = []
         self.quoteCommunities = []
         self.communities = []
+        self.communitiesPerEdgeType = {}
         self.nodes = set()
         self.nodePositions = {}
         self.edges = [] 
@@ -81,7 +83,7 @@ class Edge:
         self._id = _id
 
 class Project:
-    def __init__(self, title, description, dataset, keywords, startDate, endDate, edgeType, timeRanges, sourceNetwork, favoriteNodes, status=constants.project_inprogress):
+    def __init__(self, title, description, dataset, keywords, startDate, endDate, edgeType, edgeTypes, timeRanges, sourceNetwork, favoriteNodes, status=constants.project_inprogress):
         self.createdDate = datetime.datetime.now(pytz.utc)
         self.title = title
         self.description = description
@@ -90,6 +92,7 @@ class Project:
         self.startDate = startDate
         self.endDate = endDate
         self.edgeType = edgeType
+        self.edgeTypes = edgeTypes
         self.timeRanges = timeRanges
         self.sourceNetwork = sourceNetwork
         self.favoriteNodes = favoriteNodes

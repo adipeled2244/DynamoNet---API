@@ -16,6 +16,7 @@ module.exports = {
   getFavoriteNodes,
   addFavoriteNode,
   getFavoriteNode,
+  getEdgeTypes,
   removeFavoriteNodeFromFavoriteNodes,
   removeFavoriteNodeFromTimeRangesNetwork,
   getProjectWithTimeRanges,
@@ -102,7 +103,10 @@ async function getFavoriteNodes(projectId) {
     { favoriteNodes: 1, _id: 0 }
   );
 }
-
+async function getEdgeTypes(projectId) {
+  logger.info(`[getFavoriteNodes] - ${path.basename(__filename)}`);
+  return await Project.findOne({ _id: projectId }, { edgeTypes: 1, _id: 0 });
+}
 async function getFavoriteNode(projectId, twitterId) {
   logger.info(`[getFavoriteNode] - ${path.basename(__filename)}`);
   return await Project.findOne({

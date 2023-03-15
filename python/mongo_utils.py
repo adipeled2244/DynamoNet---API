@@ -224,6 +224,10 @@ class MongoWrapper:
                         'bsonType': 'object',
                         'description': 'must be an object'
                     },
+                    "metricsPerEdgeType": {
+                        'bsonType': 'object',
+                        'description': 'must be an object'
+                    },
                     "retweetNetworkMetrics": {
                         'bsonType': 'object',
                         'description': 'must be an object'
@@ -247,6 +251,10 @@ class MongoWrapper:
                     'communities': {
                         'bsonType': 'array',
                         'description': 'must be an array',
+                    },
+                    "communitiesPerEdgeType": {
+                        'bsonType': 'object',
+                        'description': 'must be an object'
                     },
                     'nodes': {
                         'bsonType': 'array',
@@ -275,12 +283,14 @@ class MongoWrapper:
         networks_collection = self.get_collection('networks')
         return networks_collection.insert_one({
             "networkMetrics" : network.networkMetrics,
+            "metricsPerEdgeType" : network.metricsPerEdgeType,
             "retweetNetworkMetrics" : network.retweetNetworkMetrics,
             "quoteNetworkMetrics" : network.quoteNetworkMetrics,
             "nodeMetrics" : network.nodeMetrics,
             "retweetCommunities": network.retweetCommunities,
             "quoteCommunities": network.quoteCommunities,
             "communities": network.communities,
+            "communitiesPerEdgeType": network.communitiesPerEdgeType,
             "nodes" : [ str(node) for node in network.nodes ],
             "nodePositions" : network.nodePositions,
             "edges" : [ ObjectId(edge_id) for edge_id in edges_object_ids ]
@@ -295,6 +305,7 @@ class MongoWrapper:
                                                 {
                                                 '$set': {
                                                     "networkMetrics" : network.networkMetrics,
+                                                    "metricsPerEdgeType" : network.metricsPerEdgeType,
                                                     "retweetNetworkMetrics" : network.retweetNetworkMetrics,
                                                     "quoteNetworkMetrics" : network.quoteNetworkMetrics,
                                                     "nodeMetrics" : network.nodeMetrics,
@@ -364,6 +375,10 @@ class MongoWrapper:
                         'bsonType': 'string',
                         'description': 'must be a string and is required',
                     },
+                    'edgeTypes': {
+                        'bsonType': 'array',
+                        'description': 'must be an array',
+                    },
                     'timeRanges': {
                         'bsonType': 'array',
                         'description': 'must be an array',
@@ -409,6 +424,7 @@ class MongoWrapper:
             "startDate" : project.startDate,
             "endDate" : project.endDate,
             "edgeType" : project.edgeType,
+            "edgeTypes" : project.edgeTypes,
             "timeRanges" : [ ObjectId(time_range_id) for time_range_id in time_ranges_object_ids ],
             "sourceNetwork" : ObjectId(network_object_id) if network_object_id is not None else None,
             "favoriteNodes" : project.favoriteNodes,
@@ -571,6 +587,8 @@ def mongo_network_to_network(mongo_network, mongo):
     network.edges = mongo_edges_to_network_edges(network.edges)
     if 'networkMetrics' in mongo_network:
         network.networkMetrics = mongo_network['networkMetrics']
+    if 'metricsPerEdgeType' in mongo_network:
+        network.metricsPerEdgeType = mongo_network['metricsPerEdgeType']
     if 'retweetNetworkMetrics' in mongo_network:
         network.retweetNetworkMetrics = mongo_network['retweetNetworkMetrics']
     if 'quoteNetworkMetrics' in mongo_network:
@@ -585,6 +603,8 @@ def mongo_network_to_network(mongo_network, mongo):
         network.quoteCommunities = mongo_network['quoteCommunities']
     if 'communities' in mongo_network:
         network.communities = mongo_network['communities']
+    if 'communitiesPerEdgeType' in mongo_network:
+        network.communitiesPerEdgeType = mongo_network['communitiesPerEdgeType']
     if 'nodePositions' in mongo_network:
         network.nodePositions = mongo_network['nodePositions']
     return network
@@ -621,7 +641,7 @@ def merge_Networks(retweetNetwork, quoteNetwork):
     mergedNetwork.quoteNetworkMetrics = quoteNetwork.networkMetrics
     return mergedNetwork
 
-def create_multiple_time_ranges(project_id, network_id, edgeType, time_windows, favorite_nodes, mongo_host, db_name):
+def create_multiple_time_ranges(project_id, network_id, edgeType, edgeTypes, time_windows, favorite_nodes, mongo_host, db_name):
     if edgeType == 'all':
         edgeType = None
     mongo = MongoWrapper(mongo_host, db_name)
@@ -649,12 +669,20 @@ def create_multiple_time_ranges(project_id, network_id, edgeType, time_windows, 
                 # network=merge_Networks(retweet_time_range.network, quote_time_range.network)
                 network=overall_time_range.network
             )
+            # TODO: update communities and metrics per type in project.edgeTypes 
+            for type in edgeTypes:
+                print('edgeType: {}'.format(type))
+                temp_time_range = create_time_range(network, start_date, end_date, type, mongo)
+                time_range.network.metricsPerEdgeType[type] = metrics_utils.calculateNetworkMetrics(temp_time_range.network)
+                time_range.network.communitiesPerEdgeType[type] = metrics_utils.getCommunities(temp_time_range.network)
+            # TODO: remove this when swapping to dynamic edge types
             retweetNetworkMetrics = metrics_utils.calculateNetworkMetrics(retweet_time_range.network)
             quoteNetworkMetrics = metrics_utils.calculateNetworkMetrics(quote_time_range.network)
             time_range.network.retweetNetworkMetrics = retweetNetworkMetrics
             time_range.network.quoteNetworkMetrics = quoteNetworkMetrics
             time_range.network.retweetCommunities = metrics_utils.getCommunities(retweet_time_range.network)
             time_range.network.quoteCommunities = metrics_utils.getCommunities(quote_time_range.network)
+            
         print('calculating network metrics')
         networkMetrics = metrics_utils.calculateNetworkMetrics(time_range.network)
         time_range.network.networkMetrics = networkMetrics

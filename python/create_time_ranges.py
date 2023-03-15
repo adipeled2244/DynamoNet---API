@@ -13,7 +13,7 @@ def main(args):
         'start_date': datetime.datetime.strptime(time_window['startDate'], js_date_format),
         'end_date': datetime.datetime.strptime(time_window['endDate'], js_date_format)
     } for time_window in args.time_windows]
-    time_ranges = mongo_utils.create_multiple_time_ranges(args.project_id, args.network_id, args.edgeType, args.time_windows, args.favorite_nodes, mongo_host, 'test')
+    time_ranges = mongo_utils.create_multiple_time_ranges(args.project_id, args.network_id, args.edgeType, args.edgeTypes, args.time_windows, args.favorite_nodes, mongo_host, 'test')
     pass
 
 if __name__ == '__main__':
@@ -23,6 +23,7 @@ if __name__ == '__main__':
     parser.add_argument('--network_id', help='The network id.', required=True)
     parser.add_argument('--favorite_nodes', type=ast.literal_eval, help='The favorite nodes.', required=True)
     parser.add_argument('--edgeType', help='The edge type.', required=True)
+    parser.add_argument('--edgeTypes', type=ast.literal_eval, help='Project edge types.', required=True)
     parser.add_argument('--time_windows', type=ast.literal_eval, help='The time windows.', required=True)
     args = parser.parse_args()
     main(args)

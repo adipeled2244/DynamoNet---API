@@ -86,6 +86,7 @@ exports.timeRangeController = {
         status: ProjectStatus.CREATING_TIME_RANGES,
       });
       const favoriteNodes = await projectService.getFavoriteNodes(projectId);
+      const edgeTypes = await projectService.getEdgeTypes(projectId);
 
       const pythonProcess = spawn(
         "python3",
@@ -95,6 +96,7 @@ exports.timeRangeController = {
           `--network_id=${networkId}`,
           `--favorite_nodes=${JSON.stringify(favoriteNodes.favoriteNodes)}`,
           `--edgeType=${edgeType}`,
+          `--edgesTypes=${JSON.stringify(edgeTypes.edgeTypes)}`,
           `--time_windows=${JSON.stringify(timeWindows)}`,
         ],
         (options = { detached: true })
