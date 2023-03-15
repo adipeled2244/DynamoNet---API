@@ -67,7 +67,7 @@ async function run() {
     });
     logger.info(`[updateLayout] - received network update result from worker`);
     logger.info(`[updateLayout] - returning network update result`);
-    await networkService.updateNetwork(network._id, result);
+    await networkService.updateNetwork(network._id, network);
     parentPort.postMessage({ message: "success" });
   } catch (err) {
     parentPort.postMessage({ error: err.message });
