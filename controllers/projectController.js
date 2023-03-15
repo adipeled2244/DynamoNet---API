@@ -150,7 +150,7 @@ exports.projectController = {
     const projectIdParam = req.params.projectId;
     let deleteResult;
     try {
-      //deleteResult = await projectService.deleteProject(projectIdParam);
+      deleteResult = await projectService.deleteProject(projectIdParam);
       return res.status(200).json({ message: `Project deleted successfully` });
     } catch (err) {
       res
@@ -177,11 +177,9 @@ exports.projectController = {
         usernameParam
       );
       if (!node) {
-        return res
-          .status(404)
-          .json({
-            error: `Username: ${usernameParam} not found in this project`,
-          });
+        return res.status(404).json({
+          error: `Username: ${usernameParam} not found in this project`,
+        });
       }
       const nodeAlreadyExist = await projectService.getFavoriteNode(
         projectIdParam,
@@ -233,11 +231,9 @@ exports.projectController = {
     if (addResult.matchedCount == 1) {
       return res.status(200).json({ message: "New favorite node added" });
     } else {
-      return res
-        .status(404)
-        .json({
-          error: `Cannot add new favorite node: ${usernameParam}, please try again later`,
-        });
+      return res.status(404).json({
+        error: `Cannot add new favorite node: ${usernameParam}, please try again later`,
+      });
     } //ProjectId or Favorite node not found
   },
 
@@ -272,11 +268,9 @@ exports.projectController = {
     if (deleteResultA.matchedCount == 1) {
       return res.status(200).json({ message: "favorite node remove" });
     } else {
-      return res
-        .status(404)
-        .json({
-          error: `Cannot remove node ${usernameParam} from favorite node list. `,
-        });
+      return res.status(404).json({
+        error: `Cannot remove node ${usernameParam} from favorite node list. `,
+      });
     }
   },
   async getProjectWithTimeRanges(req, res) {
