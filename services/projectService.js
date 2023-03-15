@@ -73,7 +73,7 @@ async function getProject(projectId, populate = true) {
   );
 }
 
-async function getProjects(populate = true) {
+async function getProjects(populate = false) {
   logger.info(`[getProjects] - ${path.basename(__filename)}`);
   if (!populate) {
     return await Project.find({});
@@ -182,10 +182,8 @@ async function getProjectWithTimeRanges(projectId) {
   project.timeRanges.sort((tr1, tr2) => {
     if (tr1.startDate === tr2.startDate) {
       return tr1.endDate - tr2.endDate;
-    }
-    else{
-        return tr1.startDate - tr2.startDate;
-  
+    } else {
+      return tr1.startDate - tr2.startDate;
     }
   });
 

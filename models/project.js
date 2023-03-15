@@ -12,6 +12,7 @@ const projectSchema = new Schema(
     startDate: { type: Date, required: true },
     endDate: { type: Date, required: true },
     edgeType: { type: String, default: "all" },
+    edgeTypes: { type: [String], default: [] },
     timeRanges: {
       type: [Schema.Types.ObjectId],
       ref: "TimeRange",

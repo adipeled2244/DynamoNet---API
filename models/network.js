@@ -3,6 +3,7 @@ const { Schema, model } = require("mongoose");
 const networkSchema = new Schema(
   {
     networkMetrics: { type: Map, of: Object },
+    metricsPerEdgeType: { type: Map, of: Object, default: {} },
     retweetNetworkMetrics: { type: Map, of: Object },
     quoteNetworkMetrics: { type: Map, of: Object },
     nodeMetrics: { type: Map, of: Object },
@@ -10,6 +11,7 @@ const networkSchema = new Schema(
     retweetCommunities: { type: Map, of: Array, default: {} },
     quoteCommunities: { type: Map, of: Array, default: {} },
     communities: { type: Map, of: Array, default: {} },
+    communitiesPerEdgeType: { type: Map, of: Object, default: {} },
     edges: [{ type: Schema.Types.ObjectId, ref: "Edge" }],
     nodePositions: { type: Map, of: Object },
   },
