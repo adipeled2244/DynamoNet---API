@@ -4,6 +4,8 @@ from pymongo import MongoClient
 from bson import ObjectId
 import metrics_utils
 import constants
+import asyncio
+import aiohttp
 
 from class_utils import Project, Network, Edge, User, TimeRange
 
@@ -432,7 +434,7 @@ class MongoWrapper:
     def insert_network_into_project(self, project_id, network_object_id):
         self.projects_collection_setup()
         projects_collection = self.get_collection('projects')
-        return projects_collection.update_one({'_id': ObjectId(project_id)}, {'$set': {'sourceNetwork': ObjectId(network_object_id), 'status': constants.project_ready}})
+        return projects_collection.update_one({'_id': ObjectId(project_id)}, {'$set': {'sourceNetwork': ObjectId(network_object_id)}}) # , 'status': constants.project_ready
     
     def update_project_status(self, project_id, status):
         self.projects_collection_setup()
@@ -512,6 +514,12 @@ def get_project(project_id, mongo_host, db_name):
         return None
     mongo.close()
     return project
+
+async def network_layout(network_id):
+    async with aiohttp.ClientSession() as session:
+        async with session.patch(f'{constants.backend_url}{constants.graphs_api}{network_id}') as response:
+            return response
+
 
 def save_network(network, mongo_host, db_name):
     mongo = MongoWrapper(mongo_host, db_name)
@@ -594,8 +602,11 @@ def create_time_range(network, start_date, end_date, edgeType, mongo):
     )
     return time_range
 
+
+
 def save_time_range(time_range, project_id, mongo):
     network_object_id = mongo.save_network_to_networks_collection(time_range.network, [edge._id for edge in time_range.network.edges])
+    asyncio.run(network_layout(network_object_id.inserted_id))
     time_range_object_id = mongo.save_time_range_to_timeRanges_collection(time_range, network_object_id.inserted_id)
     return mongo.insert_time_range_into_project(project_id, time_range_object_id.inserted_id)
 

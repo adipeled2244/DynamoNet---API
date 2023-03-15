@@ -9,6 +9,7 @@ const { networkRouter } = require("./routers/networkRouter");
 const { edgeRouter } = require("./routers/edgeRouter");
 const { nodeRouter } = require("./routers/nodeRouter");
 const { timeRangeRouter } = require("./routers/timeRangeRouter");
+const { graphRouter } = require("./routers/graphRouter");
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -47,6 +48,7 @@ app.use("/api/networks", networkRouter);
 app.use("/api/edges", edgeRouter);
 app.use("/api/nodes", nodeRouter);
 app.use("/api/timeRanges", timeRangeRouter);
+app.use("/api/graphs", graphRouter);
 
 app.use((req, res) => {
   res.status(404).send(`Page not found`);

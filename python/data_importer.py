@@ -4,6 +4,7 @@
 # pip install pymongo
 
 
+import asyncio
 import pytz
 from config import bearer_token, consumer_key, consumer_secret, access_token, access_token_secret
 from config import mongo_host
@@ -342,14 +343,13 @@ def import_data(project_id, limit=None, db_name='test'):
     # insert network id into project
     mongo_utils.insert_network_to_project(project_id, mergedNetwork_object_id, mongo_host=mongo_host, db_name=db_name)
 
-
     # 
     mergedNetwork.retweetCommunities = metrics_utils.getCommunities(retweetNetwork)
     mergedNetwork.quoteCommunities = metrics_utils.getCommunities(quoteNetwork)
     mergedNetwork.communities = metrics_utils.getCommunities(mergedNetwork)
 
+    mongo = MongoWrapper(mongo_host, 'test')
     try:
-        mongo = MongoWrapper(mongo_host, 'test')
         networks_collection = mongo.get_collection('networks')
         networks_collection.update_one({
                                         '_id': mergedNetwork_object_id,
@@ -363,3 +363,6 @@ def import_data(project_id, limit=None, db_name='test'):
                                     })
     except:
         print('Error updating communities')
+
+    # asyncio.run(mongo_utils.network_layout(mergedNetwork_object_id))
+    mongo.update_project_status(project_id, constants.project_ready)
