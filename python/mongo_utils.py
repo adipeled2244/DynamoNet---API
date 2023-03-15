@@ -591,7 +591,10 @@ def mongo_network_to_network(mongo_network, mongo):
 
 
 def create_time_range(network, start_date, end_date, edgeType, mongo):
-    edges_in_time_range_cursor = mongo.get_edges_from_edge_collection_in_range_with_edgeType(network['edges'], start_date, end_date, edgeType)
+    if edgeType is None:
+        edges_in_time_range_cursor = mongo.get_edges_from_edge_collection_in_range(network['edges'], start_date, end_date)
+    else:
+        edges_in_time_range_cursor = mongo.get_edges_from_edge_collection_in_range_with_edgeType(network['edges'], start_date, end_date, edgeType)
     time_range_edges = [edge for edge in edges_in_time_range_cursor]
     time_range_network = Network()
     time_range_network.edges = mongo_edges_to_network_edges(time_range_edges)
@@ -639,10 +642,12 @@ def create_multiple_time_ranges(project_id, network_id, edgeType, time_windows, 
             print('edgeType: quote')
             quote_time_range = create_time_range(network, start_date, end_date, 'quote', mongo)
             print('edgeType: all')
+            overall_time_range = create_time_range(network, start_date, end_date, None, mongo)
             time_range = TimeRange(
                 startDate=start_date,
                 endDate=end_date,
-                network=merge_Networks(retweet_time_range.network, quote_time_range.network)
+                # network=merge_Networks(retweet_time_range.network, quote_time_range.network)
+                network=overall_time_range.network
             )
             retweetNetworkMetrics = metrics_utils.calculateNetworkMetrics(retweet_time_range.network)
             quoteNetworkMetrics = metrics_utils.calculateNetworkMetrics(quote_time_range.network)
