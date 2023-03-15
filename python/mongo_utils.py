@@ -606,7 +606,7 @@ def create_time_range(network, start_date, end_date, edgeType, mongo):
 
 def save_time_range(time_range, project_id, mongo):
     network_object_id = mongo.save_network_to_networks_collection(time_range.network, [edge._id for edge in time_range.network.edges])
-    asyncio.run(network_layout(network_object_id.inserted_id))
+    # asyncio.run(network_layout(network_object_id.inserted_id))
     time_range_object_id = mongo.save_time_range_to_timeRanges_collection(time_range, network_object_id.inserted_id)
     return mongo.insert_time_range_into_project(project_id, time_range_object_id.inserted_id)
 

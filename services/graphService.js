@@ -27,7 +27,9 @@ async function updateLayout(graphId) {
 
     // listen for messages from the worker thread
     worker.on("message", async (result) => {
-      resolve(result);
+      resolve(
+        await networkService.updateNetwork(network._id, JSON.parse(result))
+      );
     });
 
     // listen for errors from the worker thread
