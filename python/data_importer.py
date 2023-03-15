@@ -139,8 +139,7 @@ def get_quotes_network(tweepyWrapper, tweets, start_date, end_date, limit=None):
                     edgeType='quote'
                 )
             )
-            # quoteNetwork.nodes.add(quote.author_id)
-            print(quote.created_at)
+            
     return quoteNetwork
 
 def merge_Networks(retweetNetwork, quoteNetwork):
