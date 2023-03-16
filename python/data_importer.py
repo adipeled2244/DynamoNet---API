@@ -48,6 +48,40 @@ def get_users(tweepyWrapper, screen_names):
             )
     return userList
 
+def get_users_by_id(tweepyWrapper, user_ids):
+    users = []
+    # get users in batches of 100
+    for i in range(0, len(user_ids), 100):
+        try:
+            users.extend(tweepyWrapper.get_users_by_id(user_ids[i:i+100]))
+        except:
+            continue
+
+    # get remaining users
+    try:
+        users.extend(tweepyWrapper.get_users_by_id(user_ids[len(users):]))
+    except:
+        pass
+
+    # create user objects
+    userList = []
+    for user in users:
+        userList.append(
+            User(
+                id=user.id, 
+                name=user.name, 
+                screen_name=user.screen_name, 
+                location=user.location, 
+                description=user.description, 
+                followers_count=user.followers_count, 
+                friends_count=user.friends_count, 
+                statuses_count=user.statuses_count, 
+                created_at=user.created_at
+                )
+            )
+    return userList
+
+
 def get_tweets_by_users(tweepyWrapper, users, start_date, end_date, limit=None):
     tweetList = []
     for user in users:
