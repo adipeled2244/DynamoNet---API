@@ -381,6 +381,11 @@ def import_data(project_id, limit=None, db_name='test'):
     mergedNetwork.retweetCommunities = metrics_utils.getCommunities(retweetNetwork)
     mergedNetwork.quoteCommunities = metrics_utils.getCommunities(quoteNetwork)
     mergedNetwork.communities = metrics_utils.getCommunities(mergedNetwork)
+    mergedNetwork.centralNodes = {
+            'betweenness': metrics_utils.getCentralNodes(mergedNetwork, 'betweenness'),
+            'closeness': metrics_utils.getCentralNodes(mergedNetwork, 'closeness'),
+            'degree': metrics_utils.getCentralNodes(mergedNetwork, 'degree'),
+        }
 
     mongo = MongoWrapper(mongo_host, 'test')
     try:

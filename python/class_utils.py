@@ -68,6 +68,7 @@ class Network:
         self.retweetCommunities = []
         self.quoteCommunities = []
         self.communities = []
+        self.centralNodes = {}
         self.communitiesPerEdgeType = {}
         self.nodes = set()
         self.nodePositions = {}

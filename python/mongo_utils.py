@@ -252,6 +252,10 @@ class MongoWrapper:
                         'bsonType': 'array',
                         'description': 'must be an array',
                     },
+                    'centralNodes': {
+                        'bsonType': 'object',
+                        'description': 'must be an object',
+                    },
                     "communitiesPerEdgeType": {
                         'bsonType': 'object',
                         'description': 'must be an object'
@@ -290,6 +294,7 @@ class MongoWrapper:
             "retweetCommunities": network.retweetCommunities,
             "quoteCommunities": network.quoteCommunities,
             "communities": network.communities,
+            "centralNodes": network.centralNodes,
             "communitiesPerEdgeType": network.communitiesPerEdgeType,
             "nodes" : [ str(node) for node in network.nodes ],
             "nodePositions" : network.nodePositions,
@@ -687,6 +692,11 @@ def create_multiple_time_ranges(project_id, network_id, edgeType, edgeTypes, tim
         networkMetrics = metrics_utils.calculateNetworkMetrics(time_range.network)
         time_range.network.networkMetrics = networkMetrics
         time_range.network.communities = metrics_utils.getCommunities(time_range.network)
+        time_range.network.centralNodes = {
+            'betweenness': metrics_utils.getCentralNodes(time_range.network, 'betweenness'),
+            'closeness': metrics_utils.getCentralNodes(time_range.network, 'closeness'),
+            'degree': metrics_utils.getCentralNodes(time_range.network, 'degree'),
+        }
         print('calculating node metrics')
         for node_id in favorite_nodes:
             node_metrics = metrics_utils.calculateNodeMetrics(time_range.network, node_id)

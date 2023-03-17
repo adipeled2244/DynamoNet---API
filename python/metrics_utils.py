@@ -25,6 +25,22 @@ def createGraph(network) -> ig.Graph:
 def numberOfNodes(graph) -> int:
     return graph.vcount()
 
+def central_betweenness_nodes(graph, n):
+    bc = graph.betweenness()
+    central_nodes = sorted(range(len(bc)), key=bc.__getitem__, reverse=True)[:n]
+    return [graph.vs[node]['name'] for node in central_nodes]
+
+def central_closeness_nodes(graph, n):  
+    cc = graph.closeness()
+    central_nodes = sorted(range(len(cc)), key=cc.__getitem__, reverse=True)[:n]
+    return [graph.vs[node]['name'] for node in central_nodes]
+
+def central_degree_nodes(graph, n):
+    dc = graph.degree()
+    central_nodes = sorted(range(len(dc)), key=dc.__getitem__, reverse=True)[:n]
+    return [graph.vs[node]['name'] for node in central_nodes]
+
+
 # Calculate the number of edges in the graph
 def numberOfEdges(graph) -> int:
     return graph.ecount()
@@ -132,3 +148,13 @@ def getCommunities(network):
     communities = communityDetection(graph)
     communities_list = communitiesToList(communities, graph)
     return communities_list
+
+def getCentralNodes(network, metric, n=5):
+    graph = createGraph(network)
+    if metric == 'betweenness':
+        return central_betweenness_nodes(graph, n)
+    if metric == 'closeness':
+        return central_closeness_nodes(graph, n)
+    if metric == 'degree':
+        return central_degree_nodes(graph, n)
+    return None
