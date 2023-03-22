@@ -5,7 +5,7 @@ from bson import ObjectId
 import metrics_utils
 import constants
 import asyncio
-import aiohttp
+# import aiohttp
 
 from class_utils import Project, Network, Edge, User, TimeRange
 
@@ -536,10 +536,10 @@ def get_project(project_id, mongo_host, db_name):
     mongo.close()
     return project
 
-async def network_layout(network_id):
-    async with aiohttp.ClientSession() as session:
-        async with session.patch(f'{constants.backend_url}{constants.graphs_api}{network_id}') as response:
-            return response
+# async def network_layout(network_id):
+#     async with aiohttp.ClientSession() as session:
+#         async with session.patch(f'{constants.backend_url}{constants.graphs_api}{network_id}') as response:
+#             return response
 
 
 def save_network(network, mongo_host, db_name):

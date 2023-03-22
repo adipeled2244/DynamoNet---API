@@ -1,6 +1,6 @@
 import igraph as ig
 import numpy as np
-
+from math import log10
 from class_utils import Project, Network, Edge, User
 
 # Get nodes for edges in the network
@@ -93,8 +93,15 @@ def closenessCentrality(graph, node) -> float:
 
 # Calculate the betweenness centrality of a node
 def betweennessCentrality(graph, node) -> float:
-    # return graph.betweenness(node)
-    return graph.vs.find(name=str(node)).betweenness()
+    allNodesBetweenness= graph.betweenness()
+    # print("nodebet",graph.vs.find(name=str(node)).betweenness())
+    # print("sum",sum(allNodesBetweenness))
+    # print("after divide",(graph.vs.find(name=str(node)).betweenness())/sum(allNodesBetweenness))
+    # print("inside",graph.vs.find(name=str(node)).betweenness())
+    normalizeValue=(graph.vs.find(name=str(node)).betweenness())/sum(allNodesBetweenness)
+    return normalizeValue
+
+
 
 # Calculate the local clustering coefficient of a node
 def localClusteringCoefficient(graph, node) -> float:
