@@ -82,7 +82,7 @@ async function getProjects(populate = false) {
   return await Project.find({}).populate(
     "sourceNetwork timeRanges",
     "-edges -nodes"
-  );
+  )
 }
 
 async function deleteProject(projectId) {
@@ -171,7 +171,7 @@ async function getProjectWithTimeRanges(projectId) {
   logger.info(`[getProjectWithTimeRanges] - ${path.basename(__filename)}`);
   const project = await Project.findOne({ _id: projectId }).populate(
     "sourceNetwork timeRanges timeRanges.network",
-    "-edges -nodes -nodePositions -communities -retweetCommunities -quoteCommunities -communitiesPerEdgeType"
+    "-edges -nodes -nodePositions -retweetCommunities -quoteCommunities -communitiesPerEdgeType"
   );
   if (!project) {
     throw new Error("Project not found");
@@ -180,7 +180,7 @@ async function getProjectWithTimeRanges(projectId) {
     const timeRange = project.timeRanges[i];
     timeRange.network = await Network.findOne(
       { _id: timeRange.network },
-      "-edges -nodes -nodePositions -communities -retweetCommunities -quoteCommunities -communitiesPerEdgeType"
+      "-edges -nodes -nodePositions -retweetCommunities -quoteCommunities -communitiesPerEdgeType"
     );
   }
   project.timeRanges.sort((tr1, tr2) => {
