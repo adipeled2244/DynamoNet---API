@@ -42,9 +42,9 @@ app.use("/", (req, res, next) => {
   next();
 });
 
-// app.use(authJwt.verifyToken);
-
 app.use("/api/auth", authRouter);
+app.use(authJwt.verifyToken);
+
 app.use("/api/projects", projectRouter);
 app.use("/api/users", userRouter);
 app.use("/api/networks", networkRouter);
