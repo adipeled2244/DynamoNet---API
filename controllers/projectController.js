@@ -166,19 +166,26 @@ exports.projectController = {
     const usernameParam = req.params.username;
     let addResult;
     try {
-      const project = await projectService.getProject(projectIdParam, false);
+      // if (! await projectService.projectExists(projectIdParam)) {
+      //   return res
+      //     .status(404)
+      //     .json({ error: "Cannot add new favorite node: Project not found" });
+      // }
+      const project = await projectService.getProjectNetwork(projectIdParam);
+      console.log(project);
       if (!project) {
-        return res
-          .status(404)
-          .json({ error: "Cannot add new favorite node: Project not found" });
+        return res.status(404).json({
+          error: `Project: ${projectIdParam} not found`,
+        });
       }
-      const node = await networkService.getNode(
+      const network = await networkService.getNetworkIdWithNode(
         project.sourceNetwork,
         usernameParam
       );
-      if (!node) {
+      console.log(network);
+      if (!network) {
         return res.status(404).json({
-          error: `Username: ${usernameParam} not found in this project`,
+          error: `Username: ${usernameParam} not found in project`,
         });
       }
       const nodeAlreadyExist = await projectService.getFavoriteNode(
@@ -192,7 +199,7 @@ exports.projectController = {
         );
       } else {
         return res.status(404).json({
-          error: `Username : ${usernameParam} already exist in favorite Nodes`,
+          error: `Username: ${usernameParam} already exist in favorite Nodes`,
         });
       }
     } catch (err) {

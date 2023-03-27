@@ -23,11 +23,14 @@ async function updateNode(id, params) {
 
 async function getNode(screenName) {
   logger.info(`[getNode] - ${path.basename(__filename)}`);
-  // get node by screen name (case insensitive)
-  return await Node.findOne({ screenName: { $regex: new RegExp(screenName, "i") } });
+  // get node by screen name case insensitive and exact match
+  return await Node.findOne({
+    screenName: { $regex: new RegExp(`^${screenName}$`, "i") },
+  });
 }
 async function getNodes(screenNames) {
   logger.info(`[getNode] - ${path.basename(__filename)}`);
+  // TODO: get node by screen name case insensitive and exact match
   return await Node.find({ screenName: { $in: screenNames } });
 }
 

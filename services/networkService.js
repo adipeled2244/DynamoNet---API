@@ -10,7 +10,7 @@ module.exports = {
   getNetwork,
   getNetworks,
   deleteNetwork,
-  getNode,
+  getNetworkIdWithNode,
 };
 async function addNetwork(params) {
   logger.info(`[addNetwork] - ${path.basename(__filename)}`);
@@ -50,16 +50,24 @@ async function deleteNetwork(networkId) {
   await Network.deleteOne({ _id: networkId });
 }
 
-async function getNode(networkId, node) {
+async function getNetworkIdWithNode(networkId, node) {
   logger.info(`[getNode] - ${path.basename(__filename)}`);
-  const network = await Network.findOne({ _id: networkId }, { nodes: 1 });
-  if (!network) {
-    throw Error(`Network id : ${networkId} not found`);
-  }
-  const networkNodes = network.nodes;
-  const nodeIndex = networkNodes.findIndex((n) => n === node);
-  if (nodeIndex === -1) {
-    return undefined;
-  }
-  return networkNodes[nodeIndex];
+  // const network = await Network.findOne({ _id: networkId }, { nodes: 1 });
+  // if (!network) {
+  //   throw Error(`Network id : ${networkId} not found`);
+  // }
+  // const networkNodes = network.nodes;
+  // const nodeIndex = networkNodes.findIndex((n) => n === node);
+  // if (nodeIndex === -1) {
+  //   return undefined;
+  // }
+  // return networkNodes[nodeIndex];
+  // case insensitive search, exact match
+  return await Network.findOne(
+    {
+      _id: networkId,
+      nodes: { $regex: new RegExp(`^${node}$`, "i") },
+    },
+    { _id: 1 }
+  );
 }
