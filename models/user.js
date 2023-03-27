@@ -12,12 +12,11 @@ const userSchema = new Schema(
       message: "Please provide a valid email",
     },
     name: { type: String, required: true },
-    projectsRefs: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Project",
-      },
-    ],
+    projectsRefs: {
+      type: [Schema.Types.ObjectId],
+      ref: "Project",
+      default: [],
+    },
     registrationDate: { type: Date },
     password: { type: String, required: true },
     token: { type: String, default: "" },
