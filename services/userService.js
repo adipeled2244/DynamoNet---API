@@ -48,7 +48,7 @@ async function getUser(id) {
 
 async function getUserByEmail(email) {
   logger.info(`[getUser] - ${path.basename(__filename)}`);
-  const user = await User.findOne({ email });
+  const user = await User.findOne({ email }).populate("projectsRefs");
   if (user) return user;
   return null;
 }
