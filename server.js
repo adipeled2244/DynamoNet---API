@@ -10,6 +10,7 @@ const { edgeRouter } = require("./routers/edgeRouter");
 const { nodeRouter } = require("./routers/nodeRouter");
 const { timeRangeRouter } = require("./routers/timeRangeRouter");
 const { graphRouter } = require("./routers/graphRouter");
+const authJwt = require("./middlewares/authJwt");
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -40,6 +41,8 @@ app.use("/", (req, res, next) => {
   logger.info(` ${req.method} |  ${req.url}  | ${moment()}  `);
   next();
 });
+
+// app.use(authJwt.verifyToken);
 
 app.use("/api/auth", authRouter);
 app.use("/api/projects", projectRouter);
