@@ -76,15 +76,17 @@ async function getProject(projectId, populate = true) {
   );
 }
 
-async function getProjects(populate = false) {
+async function getProjects(projectIds, populate = false) {
   logger.info(`[getProjects] - ${path.basename(__filename)}`);
+  console.log(projectIds);
   if (!populate) {
-    return await Project.find({});
+    return await Project.find({
+      _id: { $in: projectIds },
+    });
   }
-  return await Project.find({}).populate(
-    "sourceNetwork timeRanges",
-    "-edges -nodes"
-  );
+  return await Project.find({
+    _id: { $in: projectIds },
+  }).populate("sourceNetwork timeRanges", "-edges -nodes");
 }
 
 async function deleteProject(projectId) {

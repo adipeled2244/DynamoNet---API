@@ -30,9 +30,11 @@ exports.projectController = {
   },
   async getProjects(req, res) {
     logger.info(`[getProjects] - ${path.basename(__filename)}`);
-    let projects;
+    const userId = req.userId;
+    const user = await userService.getUser(userId);
+    // let projects;
     try {
-      projects = await projectService.getProjects();
+      const projects = await projectService.getProjects(user.projectsRefs);
       res.status(200).json({ projects });
       return;
     } catch (err) {
@@ -59,7 +61,8 @@ exports.projectController = {
   async addProject(req, res) {
     logger.info(`[addProject] - ${path.basename(__filename)}`);
     const projectParams = req.body;
-    const userId = projectParams.userId;
+    // const userId = projectParams.userId;
+    const userId = req.userId;
     const userEmail = projectParams.userEmail;
     if (!projectParams) {
       res
@@ -108,7 +111,8 @@ exports.projectController = {
       // TODO: needs fixing - updateUser recieves user id and params object:change this id to currentUserId when we will do autheniccation
       //add projectRef to user projects
       const updateUserRes = await userService.updateUser(
-        ObjectId("63f54084512dd78a25a3646a"),
+        // ObjectId("63f54084512dd78a25a3646a"),
+        ObjectId(userId),
         newProject._id
       );
 
