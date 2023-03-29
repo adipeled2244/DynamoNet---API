@@ -228,10 +228,27 @@ def get_users_by_id_as_dict(tweepyWrapper, user_ids):
 def get_users_by_id_from_mongo(user_ids):
     mongo = MongoWrapper(mongo_host, 'test')
     users = mongo.get_users_from_node_collection_by_id(user_ids)
-
-    # create user objects
     userList = {
         user['twitterId']: User(
+            id=user['twitterId'],
+            name=user['name'],
+            screen_name=user['screenName'],
+            location=user['location'],
+            description=user['description'],
+            followers_count=user['followersCount'],
+            friends_count=user['friendsCount'],
+            statuses_count=user['statusesCount'],
+            created_at=user['registrationDateTwitter']
+        )   for user in users
+    }
+    mongo.close()
+    return userList
+
+def get_users_by_screen_name_from_mongo(users_screen_names):
+    mongo = MongoWrapper(mongo_host, 'test')
+    users = mongo.get_users_from_node_collection_by_screen_name(users_screen_names)
+    userList = {
+        user['screenName']: User(
             id=user['twitterId'],
             name=user['name'],
             screen_name=user['screenName'],
