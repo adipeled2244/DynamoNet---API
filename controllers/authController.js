@@ -5,6 +5,7 @@ const bcrypt = require("bcrypt");
 const saltRounds = 10;
 const userService = require("../services/userService");
 const path = require("path");
+let jwt = require("jsonwebtoken");
 
 exports.authController = {
   async register(req, res) {
@@ -52,10 +53,12 @@ exports.authController = {
     } catch (error) {
       return res.status(400).json({ message: "Password hashing failed" });
     }
-    const token = user.generateAuthToken();
-    const tokenExp = moment().add(2, "days").toDate();
+    const token = jwt.sign(
+      { _id: user._id, email: user.email },
+      process.env.JWT_PRIVATE_KEY || "jwtPrivateKey",
+      { expiresIn: "2d" }
+    );
     user.token = token;
-    user.tokenExp = tokenExp;
     await user.save();
     user.password = undefined;
     res.status(200).json({ user });
@@ -73,14 +76,10 @@ exports.authController = {
           .status(400)
           .json({ message: "Email or password is incorrect" });
       }
-      if (!user.tokenExp || user.tokenExp < new Date()) {
-        return res.status(400).json({ message: "Token expired" });
-      }
       if (!user.token || user.token !== userParams.token) {
         return res.status(400).json({ message: "Invalid token" });
       }
       user.token = null;
-      user.tokenExp = null;
       await user.save();
       res.status(200).json({ message: "Logged out" });
     } catch (error) {

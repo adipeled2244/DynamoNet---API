@@ -82,6 +82,12 @@ exports.timeRangeController = {
     }
     try {
       const { projectId, networkId, edgeType, timeWindows } = timeRangeParams;
+      const user = req.user;
+      if (user.projectsRefs.indexOf(projectId) === -1) {
+        return res
+          .status(403)
+          .json({ message: "You don't have access to this project" });
+      }
       await projectService.updateProject(projectId, {
         status: ProjectStatus.CREATING_TIME_RANGES,
       });
@@ -129,7 +135,12 @@ exports.timeRangeController = {
     //noy sent it in url params
     const timeRangeIdParam = req.params.timeRangeId;
     const projectIdParam = req.params.projectId;
-
+    const user = req.user;
+    if (user.projectsRefs.indexOf(projectIdParam) === -1) {
+      return res
+        .status(403)
+        .json({ message: "You don't have access to this project" });
+    }
     let deleteResult;
     try {
       deleteResult = await timeRangeService.deleteTimeRange(
@@ -152,6 +163,12 @@ exports.timeRangeController = {
       res
         .status(400)
         .send({ error: "Cannot delete time ranges: invalid params sent" });
+    }
+    const user = req.user;
+    if (user.projectsRefs.indexOf(projectId) === -1) {
+      return res
+        .status(403)
+        .json({ message: "You don't have access to this project" });
     }
     let deleteResult;
     try {
@@ -176,6 +193,12 @@ exports.timeRangeController = {
       res
         .status(400)
         .send({ error: "Cannot update time range: invalid params sent" });
+    }
+    const user = req.user;
+    if (user.projectsRefs.indexOf(projectIdParam) === -1) {
+      return res
+        .status(403)
+        .json({ message: "You don't have access to this project" });
     }
     let updateResult;
     try {

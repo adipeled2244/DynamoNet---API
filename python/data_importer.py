@@ -268,6 +268,7 @@ def import_data(project_id, limit=None, db_name='test'):
     keywords = project['keywords']
     startDate = project['startDate']
     endDate = project['endDate']
+    edgeTypes = project['edgeTypes']
 
     print('Dataset: ', dataset)
     print('Start date: ', startDate)
@@ -312,7 +313,9 @@ def import_data(project_id, limit=None, db_name='test'):
     # build retweet network
     retweetNetwork = get_retweets_network(tweepyWrapper, tweetList, startDate, endDate, limit=limit)
     print('Retweet network len: ', len(retweetNetwork.edges))
-    
+    if len(retweetNetwork.edges) > 0:
+        edgeTypes.append('retweet')
+
     # get source users from retweet network
     sourceUsers = get_user_ids_from_network_source_nodes(retweetNetwork)
     print('Source users len: ', len(sourceUsers))
@@ -335,6 +338,9 @@ def import_data(project_id, limit=None, db_name='test'):
 
     # build quote network
     quoteNetwork = get_quotes_network(tweepyWrapper, tweetList, startDate, endDate)
+    print('Quote network len: ', len(quoteNetwork.edges))
+    if len(quoteNetwork.edges) > 0:
+        edgeTypes.append('quote')
     
     # get source users from quote network
     missing_source_users = get_user_ids_from_network_source_nodes(quoteNetwork, exclude_users=sourceUsers)
@@ -375,7 +381,7 @@ def import_data(project_id, limit=None, db_name='test'):
     mergedNetwork_object_id = mongo_utils.save_network(mergedNetwork, mongo_host=mongo_host, db_name=db_name)
 
     # insert network id into project
-    mongo_utils.insert_network_to_project(project_id, mergedNetwork_object_id, mongo_host=mongo_host, db_name=db_name)
+    mongo_utils.insert_network_to_project(project_id=project_id, network_object_id=mergedNetwork_object_id, edgeTypes=edgeTypes, mongo_host=mongo_host, db_name=db_name)
 
     # 
     mergedNetwork.retweetCommunities = metrics_utils.getCommunities(retweetNetwork)

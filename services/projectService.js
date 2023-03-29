@@ -78,7 +78,6 @@ async function getProject(projectId, populate = true) {
 
 async function getProjects(projectIds, populate = false) {
   logger.info(`[getProjects] - ${path.basename(__filename)}`);
-  console.log(projectIds);
   if (!populate) {
     return await Project.find({
       _id: { $in: projectIds },

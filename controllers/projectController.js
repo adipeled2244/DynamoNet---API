@@ -12,6 +12,12 @@ exports.projectController = {
     logger.info(`[getProject] - ${path.basename(__filename)}`);
     let project;
     const projectIdParam = req.params.projectId;
+    const user = req.user;
+    if (user.projectsRefs.indexOf(projectIdParam) === -1) {
+      return res
+        .status(403)
+        .json({ message: "You don't have access to this project" });
+    }
     try {
       project = await projectService.getProject(projectIdParam);
       if (project) {
@@ -30,9 +36,7 @@ exports.projectController = {
   },
   async getProjects(req, res) {
     logger.info(`[getProjects] - ${path.basename(__filename)}`);
-    const userId = req.userId;
-    const user = await userService.getUser(userId);
-    // let projects;
+    const user = req.user;
     try {
       const projects = await projectService.getProjects(user.projectsRefs);
       res.status(200).json({ projects });
@@ -111,7 +115,6 @@ exports.projectController = {
       // TODO: needs fixing - updateUser recieves user id and params object:change this id to currentUserId when we will do autheniccation
       //add projectRef to user projects
       const updateUserRes = await userService.updateUser(
-        // ObjectId("63f54084512dd78a25a3646a"),
         ObjectId(userId),
         newProject._id
       );
@@ -127,6 +130,12 @@ exports.projectController = {
   async updateProject(req, res) {
     logger.info(`[updateProject] - ${path.basename(__filename)}`);
     const projectIdParam = req.params.projectId;
+    const user = req.user;
+    if (user.projectsRefs.indexOf(projectIdParam) === -1) {
+      return res
+        .status(403)
+        .json({ message: "You don't have access to this project" });
+    }
     const projectParams = req.body;
     let project;
 
@@ -152,6 +161,12 @@ exports.projectController = {
   async deleteProject(req, res) {
     logger.info(`[deleteProject] - ${path.basename(__filename)}`);
     const projectIdParam = req.params.projectId;
+    const user = req.user;
+    if (user.projectsRefs.indexOf(projectIdParam) === -1) {
+      return res
+        .status(403)
+        .json({ message: "You don't have access to this project" });
+    }
     let deleteResult;
     try {
       deleteResult = await projectService.deleteProject(projectIdParam);
@@ -167,6 +182,12 @@ exports.projectController = {
   async addFavoriteNode(req, res) {
     logger.info(`[addFavoriteNode] - ${path.basename(__filename)}`);
     const projectIdParam = req.params.projectId;
+    const user = req.user;
+    if (user.projectsRefs.indexOf(projectIdParam) === -1) {
+      return res
+        .status(403)
+        .json({ message: "You don't have access to this project" });
+    }
     const usernameParam = req.params.username;
     let addResult;
     try {
@@ -176,7 +197,6 @@ exports.projectController = {
       //     .json({ error: "Cannot add new favorite node: Project not found" });
       // }
       const project = await projectService.getProjectNetwork(projectIdParam);
-      console.log(project);
       if (!project) {
         return res.status(404).json({
           error: `Project: ${projectIdParam} not found`,
@@ -186,7 +206,6 @@ exports.projectController = {
         project.sourceNetwork,
         usernameParam
       );
-      console.log(network);
       if (!network) {
         return res.status(404).json({
           error: `Username: ${usernameParam} not found in project`,
@@ -251,6 +270,12 @@ exports.projectController = {
   async removeFavoriteNode(req, res) {
     logger.info(`[removeFavoriteNode] - ${path.basename(__filename)}`);
     const projectIdParam = req.params.projectId;
+    const user = req.user;
+    if (user.projectsRefs.indexOf(projectIdParam) === -1) {
+      return res
+        .status(403)
+        .json({ message: "You don't have access to this project" });
+    }
     const usernameParam = req.params.username;
     let deleteResultA = null;
     let deletePromises = [];
@@ -287,6 +312,12 @@ exports.projectController = {
   async getProjectWithTimeRanges(req, res) {
     logger.info(`[getProjectWithTimeRanges] - ${path.basename(__filename)}`);
     const projectIdParam = req.params.projectId;
+    const user = req.user;
+    if (user.projectsRefs.indexOf(projectIdParam) === -1) {
+      return res
+        .status(403)
+        .json({ message: "You don't have access to this project" });
+    }
     let project;
     try {
       project = await projectService.getProjectWithTimeRanges(projectIdParam);

@@ -23,14 +23,16 @@ const verifyToken = async (req, res, next) => {
       return res.status(401).send({ message: "Unauthorized!" });
     }
     req.userId = decoded._id;
-    const user = await userService.getUser(req.userId);
-    if (user) {
-      if (!user.tokenExp || user.tokenExp < new Date()) {
-        return res.status(400).json({ message: "Token expired" });
+    try {
+      const user = await userService.getUser(req.userId);
+      if (!user) {
+        res.status(404).json({ message: "User not found" });
+        return;
       }
-      if (!user.token || user.token !== token) {
-        return res.status(400).json({ message: "Invalid token" });
-      }
+      req.user = user;
+    } catch (error) {
+      res.status(500).json({ message: "Server error" });
+      return;
     }
     next();
   });
