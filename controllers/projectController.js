@@ -166,10 +166,10 @@ exports.projectController = {
   async updateProjectCSV(req, res) {
     logger.info(`[updateProjectCSV] - ${path.basename(__filename)}`);
 
-    const projectParams = req.body;
+    const file = req.body;
     const userId = req.userId;
 
-    console.log(projectParams)
+    console.log(file)
     // const file = projectParams.file;
     // if (!projectParams) {
     //   res
