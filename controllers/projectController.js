@@ -147,7 +147,7 @@ exports.projectController = {
     const description = projectParams.description;
 
     try {
-      const newProject = await projectService.addProject({ title, description });
+      const newProject = await projectService.addProject({ title, description,createdDate });
       const updateUserRes = await userService.updateUser(
         ObjectId(userId),
         newProject._id
