@@ -11,10 +11,13 @@ const { nodeRouter } = require("./routers/nodeRouter");
 const { timeRangeRouter } = require("./routers/timeRangeRouter");
 const { graphRouter } = require("./routers/graphRouter");
 const authJwt = require("./middlewares/authJwt");
+const bodyParser = require("body-parser");
+const CsvUpload = require("express-fileupload");
 
 const app = express();
 const port = process.env.PORT || 3000;
 
+app.use(CsvUpload());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 

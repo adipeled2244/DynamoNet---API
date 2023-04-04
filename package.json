@@ -24,6 +24,7 @@
         "bcrypt": "^5.1.0",
         "child_process": "^1.0.2",
         "express": "^4.17.1",
+        "express-fileupload": "^1.4.0",
         "googleapis": "^111.0.0",
         "graphology": "^0.25.1",
         "graphology-layout": "^0.6.1",

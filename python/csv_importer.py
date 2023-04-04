@@ -124,7 +124,11 @@ if __name__ == '__main__':
     # get project_id,  from command line
     parser = argparse.ArgumentParser()
     parser.add_argument('--project_id', help='Project ID', required=True)
-    # get optional argument limit and user_email
     parser.add_argument('--csv_file', help='CSV file location', required=True)
+    parser.add_argument('--user_email', help='User email', required=False)
     args = parser.parse_args()
     main(args.project_id, args.csv_file)
+    if args.user_email is not None:
+        subject = 'DynamoNet'
+        message = 'Your project has been successfully processed!'
+        mail_sender.send_email(args.user_email, subject, message)

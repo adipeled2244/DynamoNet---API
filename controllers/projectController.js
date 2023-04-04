@@ -7,6 +7,7 @@ const { isErrored } = require("stream");
 const userService = require("../services/userService");
 const ObjectId = require("mongoose").Types.ObjectId;
 
+
 exports.projectController = {
   async getProject(req, res) {
     logger.info(`[getProject] - ${path.basename(__filename)}`);
@@ -67,12 +68,13 @@ exports.projectController = {
     const projectParams = req.body;
     // const userId = projectParams.userId;
     const userId = req.userId;
-    const userEmail = projectParams.userEmail;
     if (!projectParams) {
       res
         .status(400)
         .send({ error: "Cannot add new project: invalid params sent" });
     }
+    const userEmail = projectParams.userEmail;
+
     projectParams.createdDate = Date.now();
     if (
       !projectParams.favoriteNodes ||
@@ -131,31 +133,62 @@ exports.projectController = {
   async addProjectByCSV(req, res) {
     logger.info(`[addProjectByCSV] - ${path.basename(__filename)}`);
 
-    console.log("req.body1", req.body);
+    const projectParams = req.body;
+    const userId = req.userId;
+    const userEmail = projectParams.userEmail;
+    if (!projectParams) {
+      res
+        .status(400)
+        .send({ error: "Cannot add new project: invalid params sent" });
+    }
+    projectParams.createdDate = Date.now();
 
-    console.log("req.body2", JSON.stringify(req.body) );
+    const title = projectParams.title;
+    const description = projectParams.description;
 
-    // const projectParams = req.body;
-    // const userId = req.userId;
-    // const userEmail = projectParams.userEmail;
+    try {
+      const newProject = await projectService.addProject({ title, description });
+      const updateUserRes = await userService.updateUser(
+        ObjectId(userId),
+        newProject._id
+      );
+
+      res.status(200).json({ projectId: newProject._id });
+    } catch (err) {
+      res
+        .status(400)
+        .json({ error: "Cannot add new project by csv, please try again" });
+      return;
+    }
+
+  }
+  ,
+  async updateProjectCSV(req, res) {
+    logger.info(`[updateProjectCSV] - ${path.basename(__filename)}`);
+
+    const projectParams = req.body;
+    const userId = req.userId;
+
+    console.log(projectParams)
+    // const file = projectParams.file;
     // if (!projectParams) {
     //   res
     //     .status(400)
     //     .send({ error: "Cannot add new project: invalid params sent" });
     // }
     // projectParams.createdDate = Date.now();
-    // if (
-    //   !projectParams.favoriteNodes ||
-    //   projectParams.favoriteNodes.length === 0
-    // ) {
-    //   projectParams.favoriteNodes = projectParams.dataset;
-    // }
+
+    // const title = projectParams.title;
+    // const description = projectParams.description;
+
     // try {
-    //   const newProject = await projectService.addProject(projectParams);
+    //   const newProject = await projectService.addProject({ title, description });
     //   const pythonArguments = [
-    //     "./python/virtual_twitter.py",
+    //     "./python/csv-importer.py",
     //     `--project_id=${newProject._id}`,
     //     `--user_email=${userEmail}`,
+    //     `--files=${files}`,
+
     //   ];
     //   if (projectParams.limit !== undefined) {
     //     pythonArguments.push(`--limit=${projectParams.limit}`);
@@ -197,7 +230,7 @@ exports.projectController = {
     //   return;
     // }
 
-    }
+  }
   ,
   async updateProject(req, res) {
     logger.info(`[updateProject] - ${path.basename(__filename)}`);
