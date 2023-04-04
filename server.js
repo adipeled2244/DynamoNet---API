@@ -11,14 +11,12 @@ const { nodeRouter } = require("./routers/nodeRouter");
 const { timeRangeRouter } = require("./routers/timeRangeRouter");
 const { graphRouter } = require("./routers/graphRouter");
 const authJwt = require("./middlewares/authJwt");
-const bodyParser = require("body-parser");
-const CsvUpload = require("express-fileupload");
 
 const app = express();
 const port = process.env.PORT || 3000;
+const sizeLimit = 50 * 1024 * 1024; // 50MB
 
-app.use(CsvUpload());
-app.use(express.json());
+app.use(express.json({ limit: sizeLimit }));
 app.use(express.urlencoded({ extended: true }));
 
 app.use((req, res, next) => {

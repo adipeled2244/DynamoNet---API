@@ -9,7 +9,6 @@ projectRouter.get(
   projectController.getProjectWithTimeRanges
 );
 projectRouter.post("/csv", projectController.addProjectByCSV);
-projectRouter.patch("/csv/:projectId", projectController.updateProjectCSV);
 
 projectRouter.post("/", projectController.addProject);
 projectRouter.post(

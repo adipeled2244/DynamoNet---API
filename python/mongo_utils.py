@@ -450,7 +450,25 @@ class MongoWrapper:
     def update_project_in_projects_collection(self, object_id, project):
         self.projects_collection_setup()
         projects_collection = self.get_collection('projects')
-        return projects_collection.update_one({'_id': ObjectId(object_id)}, {'$set': project})
+        return projects_collection.update_one({'_id': ObjectId(object_id)}, {'$set': {
+            "title" : project.title,
+            "description" : project.description,
+            "dataset" : project.dataset,
+            "keywords" : project.keywords,
+            "startDate" : project.startDate,
+            "endDate" : project.endDate,
+            "edgeType" : project.edgeType,
+            "edgeTypes" : project.edgeTypes,
+            "timeRanges" : project.timeRanges,
+            "sourceNetwork" : project.sourceNetwork,
+            "favoriteNodes" : project.favoriteNodes,
+            "status" : project.status
+        }})
+    
+    def delete_project_from_projects_collection(self, object_id):
+        self.projects_collection_setup()
+        projects_collection = self.get_collection('projects')
+        return projects_collection.delete_one({'_id': ObjectId(object_id)})
 
     def insert_network_into_project(self, project_id, network_object_id, edgeTypes):
         self.projects_collection_setup()

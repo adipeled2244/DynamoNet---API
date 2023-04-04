@@ -6,7 +6,7 @@ const { spawn } = require("child_process");
 const { isErrored } = require("stream");
 const userService = require("../services/userService");
 const ObjectId = require("mongoose").Types.ObjectId;
-
+const fs = require("fs");
 
 exports.projectController = {
   async getProject(req, res) {
@@ -68,6 +68,7 @@ exports.projectController = {
     const projectParams = req.body;
     // const userId = projectParams.userId;
     const userId = req.userId;
+    const user = req.user;
     if (!projectParams) {
       res
         .status(400)
@@ -116,9 +117,10 @@ exports.projectController = {
       });
       // TODO: needs fixing - updateUser recieves user id and params object:change this id to currentUserId when we will do autheniccation
       //add projectRef to user projects
+      user.projectsRefs.push(newProject._id);
       const updateUserRes = await userService.updateUser(
         ObjectId(userId),
-        newProject._id
+        user
       );
 
       res.status(200).json({ project: newProject });
@@ -135,8 +137,16 @@ exports.projectController = {
 
     const projectParams = req.body;
     const userId = req.userId;
+    const user = req.user;
     const userEmail = projectParams.userEmail;
-    if (!projectParams) {
+    if (
+      !projectParams ||
+      !projectParams.title ||
+      !projectParams.description ||
+      !projectParams.file ||
+      !projectParams.file.length > 0 ||
+      !userEmail
+    ) {
       res
         .status(400)
         .send({ error: "Cannot add new project: invalid params sent" });
@@ -148,10 +158,54 @@ exports.projectController = {
     const createdDate = projectParams.createdDate;
 
     try {
-      const newProject = await projectService.addProject({ title, description,createdDate });
+      const newProject = await projectService.addProject({
+        title,
+        description,
+        createdDate,
+      });
+
+      const filePath = __dirname + "/../uploads/" + newProject._id + ".csv";
+      fs.writeFileSync(filePath, projectParams.file, {
+        encoding: "utf8",
+        flag: "wx",
+      });
+
+      const pythonArguments = [
+        "./python/csv_importer.py",
+        `--project_id=${newProject._id}`,
+        `--csv_file=${filePath}`,
+        `--user_email=${userEmail}`,
+      ];
+      if (projectParams.limit !== undefined) {
+        pythonArguments.push(`--limit=${projectParams.limit}`);
+      }
+      logger.info(`PYTHON import arguments: ${pythonArguments}`);
+      const pythonProcess = spawn(
+        "python3",
+        pythonArguments,
+        (options = {
+          detached: true,
+        })
+      );
+      pythonProcess.unref();
+      pythonProcess.stdout.on("data", (data) => {
+        logger.info(`PYTHON import stdout: ${data}`);
+      });
+      pythonProcess.stderr.on("data", (data) => {
+        logger.error(`PYTHON import stderr: ${data}`);
+      });
+      pythonProcess.on("close", (data) => {
+        try {
+          logger.info(`PYTHON import close stdout: ${data}`);
+        } catch (err) {
+          logger.error(`PYTHON import close stderr: ${err}`);
+        }
+      });
+
+      user.projectsRefs.push(newProject._id);
       const updateUserRes = await userService.updateUser(
         ObjectId(userId),
-        newProject._id
+        user
       );
 
       res.status(200).json({ projectId: newProject._id });
@@ -161,78 +215,76 @@ exports.projectController = {
         .json({ error: "Cannot add new project by csv, please try again" });
       return;
     }
+  },
+  // async updateProjectCSV(req, res) {
+  //   logger.info(`[updateProjectCSV] - ${path.basename(__filename)}`);
 
-  }
-  ,
-  async updateProjectCSV(req, res) {
-    logger.info(`[updateProjectCSV] - ${path.basename(__filename)}`);
+  //   const file = req.file;
+  //   const userId = req.userId;
 
-    const file = req.body;
-    const userId = req.userId;
+  //   console.log("req.file: ", req.file);
+  //   console.log("req.files: ", req.files);
+  //   console.log("req.body: ", req.body);
+  //   // const file = projectParams.file;
+  //   // if (!projectParams) {
+  //   //   res
+  //   //     .status(400)
+  //   //     .send({ error: "Cannot add new project: invalid params sent" });
+  //   // }
+  //   // projectParams.createdDate = Date.now();
 
-    console.log(file)
-    // const file = projectParams.file;
-    // if (!projectParams) {
-    //   res
-    //     .status(400)
-    //     .send({ error: "Cannot add new project: invalid params sent" });
-    // }
-    // projectParams.createdDate = Date.now();
+  //   // const title = projectParams.title;
+  //   // const description = projectParams.description;
 
-    // const title = projectParams.title;
-    // const description = projectParams.description;
+  //   // try {
+  //   //   const newProject = await projectService.addProject({ title, description });
+  //   //   const pythonArguments = [
+  //   //     "./python/csv-importer.py",
+  //   //     `--project_id=${newProject._id}`,
+  //   //     `--user_email=${userEmail}`,
+  //   //     `--files=${files}`,
 
-    // try {
-    //   const newProject = await projectService.addProject({ title, description });
-    //   const pythonArguments = [
-    //     "./python/csv-importer.py",
-    //     `--project_id=${newProject._id}`,
-    //     `--user_email=${userEmail}`,
-    //     `--files=${files}`,
+  //   //   ];
+  //   //   if (projectParams.limit !== undefined) {
+  //   //     pythonArguments.push(`--limit=${projectParams.limit}`);
+  //   //   }
+  //   //   logger.info(`PYTHON import arguments: ${pythonArguments}`);
+  //   //   const pythonProcess = spawn(
+  //   //     "python3",
+  //   //     pythonArguments,
+  //   //     (options = {
+  //   //       detached: true,
+  //   //     })
+  //   //   );
+  //   //   pythonProcess.unref();
+  //   //   pythonProcess.stdout.on("data", (data) => {
+  //   //     logger.info(`PYTHON import stdout: ${data}`);
+  //   //   });
+  //   //   pythonProcess.stderr.on("data", (data) => {
+  //   //     logger.error(`PYTHON import stderr: ${data}`);
+  //   //   });
+  //   //   pythonProcess.on("close", (data) => {
+  //   //     try {
+  //   //       logger.info(`PYTHON import close stdout: ${data}`);
+  //   //     } catch (err) {
+  //   //       logger.error(`PYTHON import close stderr: ${err}`);
+  //   //     }
+  //   //   });
+  //   //   // TODO: needs fixing - updateUser recieves user id and params object:change this id to currentUserId when we will do autheniccation
+  //   //   //add projectRef to user projects
+  //   //   const updateUserRes = await userService.updateUser(
+  //   //     ObjectId(userId),
+  //   //     newProject._id
+  //   //   );
 
-    //   ];
-    //   if (projectParams.limit !== undefined) {
-    //     pythonArguments.push(`--limit=${projectParams.limit}`);
-    //   }
-    //   logger.info(`PYTHON import arguments: ${pythonArguments}`);
-    //   const pythonProcess = spawn(
-    //     "python3",
-    //     pythonArguments,
-    //     (options = {
-    //       detached: true,
-    //     })
-    //   );
-    //   pythonProcess.unref();
-    //   pythonProcess.stdout.on("data", (data) => {
-    //     logger.info(`PYTHON import stdout: ${data}`);
-    //   });
-    //   pythonProcess.stderr.on("data", (data) => {
-    //     logger.error(`PYTHON import stderr: ${data}`);
-    //   });
-    //   pythonProcess.on("close", (data) => {
-    //     try {
-    //       logger.info(`PYTHON import close stdout: ${data}`);
-    //     } catch (err) {
-    //       logger.error(`PYTHON import close stderr: ${err}`);
-    //     }
-    //   });
-    //   // TODO: needs fixing - updateUser recieves user id and params object:change this id to currentUserId when we will do autheniccation
-    //   //add projectRef to user projects
-    //   const updateUserRes = await userService.updateUser(
-    //     ObjectId(userId),
-    //     newProject._id
-    //   );
-
-    //   res.status(200).json({ project: newProject });
-    // } catch (err) {
-    //   res
-    //     .status(400)
-    //     .json({ error: "Cannot add new project, please try again" });
-    //   return;
-    // }
-
-  }
-  ,
+  //   //   res.status(200).json({ project: newProject });
+  //   // } catch (err) {
+  //   //   res
+  //   //     .status(400)
+  //   //     .json({ error: "Cannot add new project, please try again" });
+  //   //   return;
+  //   // }
+  // },
   async updateProject(req, res) {
     logger.info(`[updateProject] - ${path.basename(__filename)}`);
     const projectIdParam = req.params.projectId;
@@ -275,9 +327,14 @@ exports.projectController = {
     }
     let deleteResult;
     try {
-      deleteResult = await projectService.deleteProject(projectIdParam);
+      deleteResult = await projectService.deleteProject(
+        projectIdParam,
+        req.userId,
+        user
+      );
       return res.status(200).json({ message: `Project deleted successfully` });
     } catch (err) {
+      console.log(err);
       res
         .status(500)
         .json({ error: `Cannot delete project, please try again later` });

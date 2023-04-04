@@ -33,6 +33,7 @@ def main(project_id, csv_file, db_name='test'):
         'edgeType': 4,
     }
 
+    csv_edges = csv_edges[1:] # remove header
     edges = []
     # parser.parse
     for edge in csv_edges:
@@ -119,15 +120,22 @@ def main(project_id, csv_file, db_name='test'):
 import argparse
 import data_importer
 import mail_sender
+import os
 
 if __name__ == '__main__':
     # get project_id,  from command line
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--project_id', help='Project ID', required=True)
-    parser.add_argument('--csv_file', help='CSV file location', required=True)
-    parser.add_argument('--user_email', help='User email', required=False)
-    args = parser.parse_args()
-    main(args.project_id, args.csv_file)
+    argParser = argparse.ArgumentParser()
+    argParser.add_argument('--project_id', help='Project ID', required=True)
+    argParser.add_argument('--csv_file', help='CSV file location', required=True)
+    argParser.add_argument('--user_email', help='User email', required=False)
+    args = argParser.parse_args()
+    try:
+        main(args.project_id, args.csv_file)
+    except Exception as e:
+        mongo = MongoWrapper(mongo_host, 'test')
+        mongo.update_project_status(args.project_id, constants.project_failed)
+    finally:
+        os.remove(args.csv_file)
     if args.user_email is not None:
         subject = 'DynamoNet'
         message = 'Your project has been successfully processed!'

@@ -2,11 +2,19 @@ import argparse
 import data_importer
 import mail_sender
 
+import constants
+from config import bearer_token, consumer_key, consumer_secret, access_token, access_token_secret, client_id, client_secret, mongo_host, email_address, email_password, app_password
+from mongo_utils import MongoWrapper
+
 def main(args):
     limit = None
     if args.limit is not None:
         limit = int(args.limit)
-    data_importer.import_data(project_id=args.project_id, limit=limit)
+    try:
+        data_importer.import_data(project_id=args.project_id, limit=limit)
+    except Exception as e:
+        mongo = MongoWrapper(mongo_host, 'test')
+        mongo.update_project_status(args.project_id, constants.project_failed)
     if args.user_email is not None:
         subject = 'DynamoNet'
         message = 'Your project has been successfully processed!'

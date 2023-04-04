@@ -1,10 +1,11 @@
 const Project = require("../models/project");
 const Network = require("../models/network");
-
+const ObjectId = require("mongoose").Types.ObjectId;
 const logger = require("../helpers/winston");
 const path = require("path");
 const timeRangeService = require("../services/timeRangeService");
 const networkService = require("../services/networkService");
+const userService = require("../services/userService");
 
 module.exports = {
   addProject,
@@ -88,14 +89,23 @@ async function getProjects(projectIds, populate = false) {
   }).populate("sourceNetwork timeRanges", "-edges -nodes");
 }
 
-async function deleteProject(projectId) {
+async function deleteProject(projectId, userId, user) {
   logger.info(`[deleteProject] - ${path.basename(__filename)}`);
   const project = await getProject(projectId, false);
   if (!project) {
     throw Error(`Project id : ${projectId} not found`);
   }
   await timeRangeService.deleteTimeRanges(project.timeRanges, projectId);
-  await networkService.deleteNetwork(project.sourceNetwork);
+  if (project.sourceNetwork) {
+    await networkService.deleteNetwork(project.sourceNetwork);
+  }
+  let userProjectsRef = user.projectsRefs;
+  userProjectsRef = userProjectsRef.filter(
+    (projectRef) => projectRef.toString() !== projectId.toString()
+  );
+  await userService.updateUser(ObjectId(userId), {
+    projectsRefs: userProjectsRef,
+  });
   return await Project.deleteOne({ _id: projectId });
 }
 
