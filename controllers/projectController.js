@@ -145,6 +145,7 @@ exports.projectController = {
 
     const title = projectParams.title;
     const description = projectParams.description;
+    const createdDate = projectParams.createdDate;
 
     try {
       const newProject = await projectService.addProject({ title, description,createdDate });
