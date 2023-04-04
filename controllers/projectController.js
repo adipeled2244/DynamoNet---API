@@ -127,6 +127,75 @@ exports.projectController = {
       return;
     }
   },
+
+  async addProjectByCSV(req, res) {
+    logger.info(`[addProjectByCSV] - ${path.basename(__filename)}`);
+
+    console.log("req.body", req.body);
+    // const projectParams = req.body;
+    // const userId = req.userId;
+    // const userEmail = projectParams.userEmail;
+    // if (!projectParams) {
+    //   res
+    //     .status(400)
+    //     .send({ error: "Cannot add new project: invalid params sent" });
+    // }
+    // projectParams.createdDate = Date.now();
+    // if (
+    //   !projectParams.favoriteNodes ||
+    //   projectParams.favoriteNodes.length === 0
+    // ) {
+    //   projectParams.favoriteNodes = projectParams.dataset;
+    // }
+    // try {
+    //   const newProject = await projectService.addProject(projectParams);
+    //   const pythonArguments = [
+    //     "./python/virtual_twitter.py",
+    //     `--project_id=${newProject._id}`,
+    //     `--user_email=${userEmail}`,
+    //   ];
+    //   if (projectParams.limit !== undefined) {
+    //     pythonArguments.push(`--limit=${projectParams.limit}`);
+    //   }
+    //   logger.info(`PYTHON import arguments: ${pythonArguments}`);
+    //   const pythonProcess = spawn(
+    //     "python3",
+    //     pythonArguments,
+    //     (options = {
+    //       detached: true,
+    //     })
+    //   );
+    //   pythonProcess.unref();
+    //   pythonProcess.stdout.on("data", (data) => {
+    //     logger.info(`PYTHON import stdout: ${data}`);
+    //   });
+    //   pythonProcess.stderr.on("data", (data) => {
+    //     logger.error(`PYTHON import stderr: ${data}`);
+    //   });
+    //   pythonProcess.on("close", (data) => {
+    //     try {
+    //       logger.info(`PYTHON import close stdout: ${data}`);
+    //     } catch (err) {
+    //       logger.error(`PYTHON import close stderr: ${err}`);
+    //     }
+    //   });
+    //   // TODO: needs fixing - updateUser recieves user id and params object:change this id to currentUserId when we will do autheniccation
+    //   //add projectRef to user projects
+    //   const updateUserRes = await userService.updateUser(
+    //     ObjectId(userId),
+    //     newProject._id
+    //   );
+
+    //   res.status(200).json({ project: newProject });
+    // } catch (err) {
+    //   res
+    //     .status(400)
+    //     .json({ error: "Cannot add new project, please try again" });
+    //   return;
+    // }
+
+    // }
+  ,
   async updateProject(req, res) {
     logger.info(`[updateProject] - ${path.basename(__filename)}`);
     const projectIdParam = req.params.projectId;
