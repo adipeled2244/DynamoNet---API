@@ -6,6 +6,7 @@ const saltRounds = 10;
 const userService = require("../services/userService");
 const path = require("path");
 let jwt = require("jsonwebtoken");
+const SECRET = process.env.JWT_PRIVATE_KEY || "jwtPrivateKey";
 
 exports.authController = {
   async register(req, res) {
@@ -76,20 +77,20 @@ exports.authController = {
           .status(400)
           .json({ message: "Email or password is incorrect" });
       }
-      if (!user.token || user.token !== userParams.token) {
-        return res.status(400).json({ message: "Invalid token" });
+      if (userParams.token && user.token == userParams.token) {
+        user.token = null;
+        await user.save();
       }
-      user.token = null;
-      await user.save();
-      res.status(200).json({ message: "Logged out" });
+      return res.status(200).json({ message: "Logged out" });
     } catch (error) {
+      console.log(error);
       return res.status(400).json({ message: "Logout failed" });
     }
   },
-  async refreshToken(req, res) {
-    logger.info(`[refreshToken] - ${path.basename(__filename)}`);
-    const user = req.user;
-    const token = user.generateAuthToken();
-    res.status(200).json({ token: token });
-  },
+  // async refreshToken(req, res) {
+  //   logger.info(`[refreshToken] - ${path.basename(__filename)}`);
+  //   const user = req.user;
+  //   const token = user.generateAuthToken();
+  //   res.status(200).json({ token: token });
+  // },
 };
