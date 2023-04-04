@@ -131,7 +131,10 @@ exports.projectController = {
   async addProjectByCSV(req, res) {
     logger.info(`[addProjectByCSV] - ${path.basename(__filename)}`);
 
-    console.log("req.body", req.body);
+    console.log("req.body1", req.body);
+
+    console.log("req.body2", JSON.stringify(req.body) );
+
     // const projectParams = req.body;
     // const userId = req.userId;
     // const userEmail = projectParams.userEmail;
@@ -194,7 +197,7 @@ exports.projectController = {
     //   return;
     // }
 
-    // }
+    }
   ,
   async updateProject(req, res) {
     logger.info(`[updateProject] - ${path.basename(__filename)}`);

@@ -8,6 +8,7 @@ projectRouter.get(
   "/:projectId/timeRanges",
   projectController.getProjectWithTimeRanges
 );
+projectRouter.post("/csv", projectController.addProjectByCSV);
 projectRouter.post("/", projectController.addProject);
 projectRouter.post(
   "/:projectId/favoriteNodes/:username",
