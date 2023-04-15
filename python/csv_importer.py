@@ -45,10 +45,14 @@ def main(project_id, csv_file, db_name='test'):
             edgeType=edge[csv_edges_columns['edgeType']],
         ))
 
+    print('Number of edges: ' + str(len(edges)))
+
     nodes_set = set()
     for edge in edges:
         nodes_set.add(edge.source)
         nodes_set.add(edge.destination)
+
+    print('Number of nodes: ' + str(len(nodes_set)))
 
     users_dict = data_importer.get_users_by_screen_name_from_mongo(list(nodes_set))
     missing_users = [ user for user in nodes_set if user not in users_dict ]
@@ -59,14 +63,16 @@ def main(project_id, csv_file, db_name='test'):
     for user in missing_users_list:
         users_dict[user.screen_name] = user
 
+    print('Number of users: ' + str(len(users_dict)))
+
     mongo_utils.save_users(users_dict.values(), mongo_host, 'test')
 
-    for edge in edges:
-        edge.source = users_dict[edge.source]
-        edge.destination = users_dict[edge.destination]
+    # for edge in edges:
+    #     edge.source = users_dict[edge.source]
+    #     edge.destination = users_dict[edge.destination]
 
     network = Network()
-    network.nodes = list(users_dict.keys())
+    network.nodes = list(nodes_set)
     network.edges = edges
 
     edgeTypes = set()
@@ -78,8 +84,10 @@ def main(project_id, csv_file, db_name='test'):
         for edge in network.edges:
             if edge.edgeType == type:
                 temp_network.edges.append(edge)
-                temp_network.nodes.add(edge.source.screen_name)
-                temp_network.nodes.add(edge.destination.screen_name)
+                # temp_network.nodes.add(edge.source.screen_name)
+                # temp_network.nodes.add(edge.destination.screen_name)
+                temp_network.nodes.add(edge.source)
+                temp_network.nodes.add(edge.destination)
         temp_network.networkMetrics = metrics_utils.calculateNetworkMetrics(temp_network)
         temp_network.communities = metrics_utils.getCommunities(temp_network)
         network.metricsPerEdgeType[type] = temp_network.networkMetrics
@@ -89,6 +97,7 @@ def main(project_id, csv_file, db_name='test'):
     network.communities = metrics_utils.getCommunities(network)
 
     network_object_id = mongo_utils.save_network(network, mongo_host, 'test')
+    print('Network saved with id: ' + str(network_object_id))
 
     minDate = network.edges[0].timestamp
     maxDate = network.edges[0].timestamp
@@ -98,6 +107,8 @@ def main(project_id, csv_file, db_name='test'):
         if edge.timestamp > maxDate:
             maxDate = edge.timestamp
 
+    print('Min date: ' + str(minDate))
+    print('Max date: ' + str(maxDate))
 
     mongo = MongoWrapper(mongo_host, 'test')
     project = Project(
@@ -114,7 +125,7 @@ def main(project_id, csv_file, db_name='test'):
         favoriteNodes=[],
         status='ready'
     )
-    mongo.update_project_in_projects_collection(project_id, project)
+    mongo.update_project_in_projects_collection(project_id, project)    
 
 
 import argparse
@@ -132,6 +143,7 @@ if __name__ == '__main__':
     try:
         main(args.project_id, args.csv_file)
     except Exception as e:
+        print(e)
         mongo = MongoWrapper(mongo_host, 'test')
         mongo.update_project_status(args.project_id, constants.project_failed)
     finally:
