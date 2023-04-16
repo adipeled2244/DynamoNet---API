@@ -12,8 +12,8 @@ def getNodes(network) -> set:
     return nodes
 
 # Create a graph from the network
-def createGraph(network) -> ig.Graph:
-    graph = ig.Graph(directed=False)
+def createGraph(network, directed=False) -> ig.Graph:
+    graph = ig.Graph(directed=directed)
     if network.nodes is None or len(network.nodes) == 0:
         network.nodes = getNodes(network)
     graph.add_vertices([str(node) for node in network.nodes])
@@ -127,12 +127,13 @@ def calculateNetworkMetrics(network) -> dict:
 ## Calculate metrics for a node
 def calculateNodeMetrics(network, node) -> dict:
     graph = createGraph(network)
+    directedGraph = createGraph(network, True)
     if node not in network.nodes:
         return None
     node_metrics = {
         'degree': degree(graph, node),
-        'inDegree': inDegree(graph, node),
-        'outDegree': outDegree(graph, node),
+        'inDegree': inDegree(directedGraph, node),
+        'outDegree': outDegree(directedGraph, node),
         'closenessCentrality': closenessCentrality(graph, node),
         'betweennessCentrality': betweennessCentrality(graph, node),
         'localClusteringCoefficient': localClusteringCoefficient(graph, node)
