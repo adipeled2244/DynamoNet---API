@@ -716,6 +716,8 @@ def create_multiple_time_ranges(project_id, network_id, edgeType, edgeTypes, tim
             'closeness': metrics_utils.getCentralNodes(time_range.network, 'closeness'),
             'degree': metrics_utils.getCentralNodes(time_range.network, 'degree'),
         }
+        if time_range.network.networkMetrics["numberOfNodes"] == 0:
+            continue
         print('calculating node metrics')
         for node_id in favorite_nodes:
             node_metrics = metrics_utils.calculateNodeMetrics(time_range.network, node_id)
