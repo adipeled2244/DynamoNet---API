@@ -4,8 +4,6 @@ const networkSchema = new Schema(
   {
     networkMetrics: { type: Map, of: Object },
     metricsPerEdgeType: { type: Map, of: Object, default: {} },
-    retweetNetworkMetrics: { type: Map, of: Object },
-    quoteNetworkMetrics: { type: Map, of: Object },
     nodeMetrics: { type: Map, of: Object },
     nodes: { type: [String], required: true },
     communities: { type: Map, of: Array, default: {} },
