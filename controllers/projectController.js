@@ -69,6 +69,7 @@ exports.projectController = {
     // const userId = projectParams.userId;
     const userId = req.userId;
     const user = req.user;
+    const io = req.io;
     if (!projectParams) {
       res
         .status(400)
@@ -114,6 +115,8 @@ exports.projectController = {
         } catch (err) {
           logger.error(`PYTHON import close stderr: ${err}`);
         }
+
+        io.emit("projectReady", { projectId: newProject._id });
       });
       // TODO: needs fixing - updateUser recieves user id and params object:change this id to currentUserId when we will do autheniccation
       //add projectRef to user projects
@@ -139,6 +142,7 @@ exports.projectController = {
     const userId = req.userId;
     const user = req.user;
     const userEmail = projectParams.userEmail;
+    const io = req.io;
     if (
       !projectParams ||
       !projectParams.title ||
@@ -200,6 +204,8 @@ exports.projectController = {
         } catch (err) {
           logger.error(`PYTHON import close stderr: ${err}`);
         }
+
+        io.emit("projectReady", { projectId: newProject._id });
       });
 
       user.projectsRefs.push(newProject._id);
@@ -277,6 +283,7 @@ exports.projectController = {
     logger.info(`[addFavoriteNode] - ${path.basename(__filename)}`);
     const projectIdParam = req.params.projectId;
     const user = req.user;
+    const io = req.io;
     if (user.projectsRefs.indexOf(projectIdParam) === -1) {
       return res
         .status(403)
@@ -350,10 +357,18 @@ exports.projectController = {
       } catch (err) {
         logger.error(`PYTHON import close stderr: ${err}`);
       }
+
+      io.emit("newFavoriteNode", {
+        projectId: projectIdParam,
+        username: usernameParam,
+      });
     });
 
     if (addResult.matchedCount == 1) {
-      return res.status(200).json({ message: "New favorite node added" });
+      return res.status(200).json({
+        message:
+          "New favorite node added. Calculating metrics please be patient...",
+      });
     } else {
       return res.status(404).json({
         error: `Cannot add new favorite node: ${usernameParam}, please try again later`,

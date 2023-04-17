@@ -74,7 +74,7 @@ exports.timeRangeController = {
   async addTimeRanges(req, res) {
     logger.info(`[addTimeRange] - ${path.basename(__filename)}`);
     const timeRangeParams = req.body;
-
+    const io = req.io;
     if (!timeRangeParams) {
       res
         .status(400)
@@ -120,6 +120,8 @@ exports.timeRangeController = {
         } catch (err) {
           logger.error(`PYTHON TR close stderr: ${err}`);
         }
+        // notify client that time ranges are ready
+        io.emit("timeRangesReady", { projectId });
       });
       res.status(200).json({ message: "Data processing " });
     } catch (err) {

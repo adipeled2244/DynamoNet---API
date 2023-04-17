@@ -11,11 +11,15 @@ const { nodeRouter } = require("./routers/nodeRouter");
 const { timeRangeRouter } = require("./routers/timeRangeRouter");
 const { graphRouter } = require("./routers/graphRouter");
 const authJwt = require("./middlewares/authJwt");
+const socketIo = require("socket.io");
+const http = require("http");
 
 const app = express();
 const port = process.env.PORT || 3000;
-const sizeLimit = 50 * 1024 * 1024; // 50MB
 
+const server = http.createServer(app);
+
+const sizeLimit = 50 * 1024 * 1024; // 50MB
 app.use(express.json({ limit: sizeLimit }));
 app.use(express.urlencoded({ extended: true }));
 
@@ -46,6 +50,17 @@ app.use("/", (req, res, next) => {
 app.use("/api/auth", authRouter);
 app.use(authJwt.verifyToken);
 
+const io = socketIo(server, {
+  cors: {
+    origin: "*",
+  },
+});
+
+app.use((req, res, next) => {
+  req.io = io;
+  next();
+});
+
 app.use("/api/projects", projectRouter);
 app.use("/api/users", userRouter);
 app.use("/api/networks", networkRouter);
@@ -58,6 +73,17 @@ app.use((req, res) => {
   res.status(404).send(`Page not found`);
 });
 
-app.listen(port, () =>
-  console.log(`Express server is running on port ${port}`)
-);
+// app.listen(port, () =>
+//   console.log(`Express server is running on port ${port}`)
+// );
+
+server.listen(port, () => {
+  console.log(`Express server is running on port ${port}`);
+});
+
+io.on("connection", (socket) => {
+  console.log("New client connected");
+  socket.on("disconnect", () => {
+    console.log("Client disconnected");
+  });
+});
