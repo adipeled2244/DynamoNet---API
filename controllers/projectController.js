@@ -14,11 +14,11 @@ exports.projectController = {
     let project;
     const projectIdParam = req.params.projectId;
     const user = req.user;
-    if (user.projectsRefs.indexOf(projectIdParam) === -1) {
-      return res
-        .status(403)
-        .json({ message: "You don't have access to this project" });
-    }
+    // if (user.projectsRefs.indexOf(projectIdParam) === -1) {
+    //   return res
+    //     .status(403)
+    //     .json({ message: "You don't have access to this project" });
+    // }
     try {
       project = await projectService.getProject(projectIdParam);
       if (project) {
@@ -422,11 +422,11 @@ exports.projectController = {
     logger.info(`[getProjectWithTimeRanges] - ${path.basename(__filename)}`);
     const projectIdParam = req.params.projectId;
     const user = req.user;
-    if (user.projectsRefs.indexOf(projectIdParam) === -1) {
-      return res
-        .status(403)
-        .json({ message: "You don't have access to this project" });
-    }
+    // if (user.projectsRefs.indexOf(projectIdParam) === -1) {
+    //   return res
+    //     .status(403)
+    //     .json({ message: "You don't have access to this project" });
+    // }
     let project;
     try {
       project = await projectService.getProjectWithTimeRanges(projectIdParam);
