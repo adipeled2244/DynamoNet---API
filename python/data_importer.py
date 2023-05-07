@@ -401,9 +401,9 @@ def import_data(project_id, limit=None, db_name='test'):
     mongo_utils.insert_network_to_project(project_id=project_id, network_object_id=mergedNetwork_object_id, edgeTypes=edgeTypes, mongo_host=mongo_host, db_name=db_name)
 
     # 
-    mergedNetwork.retweetCommunities = metrics_utils.getCommunities(retweetNetwork)
-    mergedNetwork.quoteCommunities = metrics_utils.getCommunities(quoteNetwork)
-    mergedNetwork.communities = metrics_utils.getCommunities(mergedNetwork)
+    mergedNetwork.retweetCommunities, mergedNetwork.retweetNetworkMetrics['modularity']  = metrics_utils.getCommunities(retweetNetwork)
+    mergedNetwork.quoteCommunities, mergedNetwork.quoteNetworkMetrics['modularity']  = metrics_utils.getCommunities(quoteNetwork)
+    mergedNetwork.communities, mergedNetwork.networkMetrics['modularity'] = metrics_utils.getCommunities(mergedNetwork)
     mergedNetwork.centralNodes = {
             'betweenness': metrics_utils.getCentralNodes(mergedNetwork, 'betweenness'),
             'closeness': metrics_utils.getCentralNodes(mergedNetwork, 'closeness'),

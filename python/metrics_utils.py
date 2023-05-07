@@ -155,7 +155,7 @@ def getCommunities(network):
     graph = createGraph(network)
     communities = communityDetection(graph)
     communities_list = communitiesToList(communities, graph)
-    return communities_list
+    return communities_list, communities.modularity
 
 def getCentralNodes(network, metric, n=5):
     graph = createGraph(network)

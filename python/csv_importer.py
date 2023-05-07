@@ -89,12 +89,14 @@ def main(project_id, csv_file, db_name='test'):
                 temp_network.nodes.add(edge.source)
                 temp_network.nodes.add(edge.destination)
         temp_network.networkMetrics = metrics_utils.calculateNetworkMetrics(temp_network)
-        temp_network.communities = metrics_utils.getCommunities(temp_network)
+        communities, modularity = metrics_utils.getCommunities(temp_network)
+        temp_network.communities = communities
+        temp_network.networkMetrics['modularity'] = modularity
         network.metricsPerEdgeType[type] = temp_network.networkMetrics
         network.communitiesPerEdgeType[type] = temp_network.communities
 
     network.networkMetrics = metrics_utils.calculateNetworkMetrics(network)
-    network.communities = metrics_utils.getCommunities(network)
+    network.communities, network.networkMetrics['modularity'] = metrics_utils.getCommunities(network)
 
     network_object_id = mongo_utils.save_network(network, mongo_host, 'test')
     print('Network saved with id: ' + str(network_object_id))

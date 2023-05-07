@@ -698,7 +698,7 @@ def create_multiple_time_ranges(project_id, network_id, edgeType, edgeTypes, tim
                 print('edgeType: {}'.format(type))
                 temp_time_range = create_time_range(network, start_date, end_date, type, mongo)
                 time_range.network.metricsPerEdgeType[type] = metrics_utils.calculateNetworkMetrics(temp_time_range.network)
-                time_range.network.communitiesPerEdgeType[type] = metrics_utils.getCommunities(temp_time_range.network)
+                time_range.network.communitiesPerEdgeType[type], time_range.network.metricsPerEdgeType[type]['modularity'] = metrics_utils.getCommunities(temp_time_range.network)
             # # TODO: remove this when swapping to dynamic edge types
             # retweetNetworkMetrics = metrics_utils.calculateNetworkMetrics(retweet_time_range.network)
             # quoteNetworkMetrics = metrics_utils.calculateNetworkMetrics(quote_time_range.network)
@@ -710,7 +710,7 @@ def create_multiple_time_ranges(project_id, network_id, edgeType, edgeTypes, tim
         print('calculating network metrics')
         networkMetrics = metrics_utils.calculateNetworkMetrics(time_range.network)
         time_range.network.networkMetrics = networkMetrics
-        time_range.network.communities = metrics_utils.getCommunities(time_range.network)
+        time_range.network.communities, time_range.network.networkMetrics['modularity'] = metrics_utils.getCommunities(time_range.network)
         time_range.network.centralNodes = {
             'betweenness': metrics_utils.getCentralNodes(time_range.network, 'betweenness'),
             'closeness': metrics_utils.getCentralNodes(time_range.network, 'closeness'),
