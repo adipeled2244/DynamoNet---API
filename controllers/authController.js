@@ -57,7 +57,7 @@ exports.authController = {
     const token = jwt.sign(
       { _id: user._id, email: user.email },
       process.env.JWT_PRIVATE_KEY || "jwtPrivateKey",
-      { expiresIn: "2d" }
+      { expiresIn: "30d" }
     );
     user.token = token;
     await user.save();
