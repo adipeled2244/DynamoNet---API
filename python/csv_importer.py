@@ -97,6 +97,11 @@ def main(project_id, csv_file, db_name='test'):
 
     network.networkMetrics = metrics_utils.calculateNetworkMetrics(network)
     network.communities, network.networkMetrics['modularity'] = metrics_utils.getCommunities(network)
+    network.centralNodes = {
+            'betweenness': metrics_utils.getCentralNodes(network, 'betweenness'),
+            'closeness': metrics_utils.getCentralNodes(network, 'closeness'),
+            'degree': metrics_utils.getCentralNodes(network, 'degree'),
+        }
 
     network_object_id = mongo_utils.save_network(network, mongo_host, 'test')
     print('Network saved with id: ' + str(network_object_id))
