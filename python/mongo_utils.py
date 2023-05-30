@@ -218,7 +218,6 @@ class MongoWrapper:
         network_validator = {
             '$jsonSchema': {
                 'bsonType': 'object',
-                'required': ['edges'],
                 'properties': {
                     "networkMetrics": {
                         'bsonType': 'object',
@@ -282,24 +281,73 @@ class MongoWrapper:
         if 'networks' not in self.get_collection_names():
             self.db.create_collection('networks', validator=network_validator)
 
-    def save_network_to_networks_collection(self, network, edges_object_ids):
+    # work around: BSON document too large (25245814 bytes) - the connected server supports BSON document sizes up to 16793598 bytes.
+    def save_network_to_networks_collection(self, network, edges_object_ids, chunk_size=1000):
         self.networks_collection_setup()
         networks_collection = self.get_collection('networks')
-        return networks_collection.insert_one({
-            "networkMetrics" : network.networkMetrics,
-            "metricsPerEdgeType" : network.metricsPerEdgeType,
-            "retweetNetworkMetrics" : network.retweetNetworkMetrics,
-            "quoteNetworkMetrics" : network.quoteNetworkMetrics,
-            "nodeMetrics" : network.nodeMetrics,
-            "retweetCommunities": network.retweetCommunities,
-            "quoteCommunities": network.quoteCommunities,
-            "communities": network.communities,
-            "centralNodes": network.centralNodes,
-            "communitiesPerEdgeType": network.communitiesPerEdgeType,
-            "nodes" : [ str(node) for node in network.nodes ],
-            "nodePositions" : network.nodePositions,
-            "edges" : [ ObjectId(edge_id) for edge_id in edges_object_ids ]
-        })
+        edges_collection = self.get_collection('edges')
+
+        try:
+            return networks_collection.insert_one({
+                "networkMetrics" : network.networkMetrics,
+                "metricsPerEdgeType" : network.metricsPerEdgeType,
+                "retweetNetworkMetrics" : network.retweetNetworkMetrics,
+                "quoteNetworkMetrics" : network.quoteNetworkMetrics,
+                "nodeMetrics" : network.nodeMetrics,
+                "retweetCommunities": network.retweetCommunities,
+                "quoteCommunities": network.quoteCommunities,
+                "communities": network.communities,
+                "centralNodes": network.centralNodes,
+                "communitiesPerEdgeType": network.communitiesPerEdgeType,
+                "nodes" : [ str(node) for node in network.nodes ],
+                "nodePositions" : network.nodePositions,
+                "edges" : [ ObjectId(edge_id) for edge_id in edges_object_ids ]
+            })
+            # # Save the main network document without arrays
+            # network_document = {
+            #     "networkMetrics": network.networkMetrics,
+            #     "metricsPerEdgeType": network.metricsPerEdgeType,
+            #     "retweetNetworkMetrics": network.retweetNetworkMetrics,
+            #     "quoteNetworkMetrics": network.quoteNetworkMetrics,
+            #     "nodeMetrics": network.nodeMetrics,
+            #     "nodePositions": network.nodePositions,
+            #     "nodes" : [ str(node) for node in network.nodes ], 
+            #     "edges" : [ ObjectId(edge_id) for edge_id in edges_object_ids ],
+            # }
+            # network_id_response = networks_collection.insert_one(network_document)
+            # network_id = network_id_response.inserted_id
+
+            # # Update the other arrays in chunks
+            # other_arrays = ["retweetCommunities", "quoteCommunities", "communities"]
+            # for array_name in other_arrays:
+            #     array_values = getattr(network, array_name)
+            #     array_chunk_size = chunk_size // 10  # Adjust the chunk size for other arrays based on their expected size
+            #     array_chunks = [list(array_values)[i:i + array_chunk_size] for i in range(0, len(array_values), array_chunk_size)]
+            #     for chunk in array_chunks:
+            #         networks_collection.update_one(
+            #             {"_id": network_id},
+            #             {"$push": {
+            #                 array_name: {"$each": chunk}
+            #             }}
+            #         )
+
+            # # Update the 'centralNodes' and 'communitiesPerEdgeType' dictionaries
+            # networks_collection.update_one(
+            #     {"_id": network_id},
+            #     {"$set": {
+            #         "centralNodes": network.centralNodes,
+            #         "communitiesPerEdgeType": network.communitiesPerEdgeType
+            #     }}
+            # )
+
+            # return network_id_response
+        except Exception as e:
+            # Removing the inserted edges from the "edges" collection
+            edges_collection.delete_many({"_id": {"$in": [ObjectId(edge_id) for edge_id in edges_object_ids]}})
+
+            # Raising the exception to be handled at the higher level
+            raise e
+        
 
     def update_network_to_networks_collection(self, network_id, network):
         self.networks_collection_setup()
