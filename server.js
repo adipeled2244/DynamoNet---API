@@ -82,8 +82,14 @@ server.listen(port, () => {
 });
 
 io.on("connection", (socket) => {
-  console.log("New client connected");
+  console.log("New client connected: " + socket.id);
+  logger.info(
+    `[New client connected] - ${path.basename(__filename)} - ${socket.id}`
+  );
   socket.on("disconnect", () => {
-    console.log("Client disconnected");
+    console.log("Client disconnected: " + socket.id);
+    logger.info(
+      `[Client disconnected] - ${path.basename(__filename)} - ${socket.id}`
+    );
   });
 });
