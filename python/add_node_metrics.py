@@ -5,7 +5,6 @@ def main(args):
     mongo_utils.update_node_metrics_in_project(args.project_id, args.screen_name, mongo_host, db_name='test')
 
 if __name__ == '__main__':
-    # get project_id, and usesr_id from command line
     parser = argparse.ArgumentParser()
     parser.add_argument('--project_id', help='Project ID', required=True)
     parser.add_argument('--screen_name', help='Username on twitter', required=True)

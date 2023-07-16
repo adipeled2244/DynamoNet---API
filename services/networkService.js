@@ -52,16 +52,6 @@ async function deleteNetwork(networkId) {
 
 async function getNetworkIdWithNode(networkId, node) {
   logger.info(`[getNode] - ${path.basename(__filename)}`);
-  // const network = await Network.findOne({ _id: networkId }, { nodes: 1 });
-  // if (!network) {
-  //   throw Error(`Network id : ${networkId} not found`);
-  // }
-  // const networkNodes = network.nodes;
-  // const nodeIndex = networkNodes.findIndex((n) => n === node);
-  // if (nodeIndex === -1) {
-  //   return undefined;
-  // }
-  // return networkNodes[nodeIndex];
   // case insensitive search, exact match
   return await Network.findOne(
     {

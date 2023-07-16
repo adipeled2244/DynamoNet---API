@@ -1,7 +1,5 @@
 import igraph as ig
 import numpy as np
-from math import log10
-from class_utils import Project, Network, Edge, User
 
 # Get nodes for edges in the network
 def getNodes(network) -> set:
@@ -74,30 +72,22 @@ def freemanDegreeCentrality(graph) -> float:
 # Calculate the degree of a node
 def degree(graph, node) -> int:
     return graph.vs.find(name=str(node)).degree()
-    # return graph.degree(node_id)
 
 # Calculate the in-degree of a node
 def inDegree(graph, node) -> int:
     return graph.vs.find(name=str(node)).indegree()
-    # return graph.strength(node, mode=ig.IN)
 
 # Calculate the out-degree of a node
 def outDegree(graph, node) -> int:
     return graph.vs.find(name=str(node)).outdegree()
-    # return graph.strength(node, mode=ig.OUT)
 
 # Calculate the closeness centrality of a node
 def closenessCentrality(graph, node) -> float:
     return graph.vs.find(name=str(node)).closeness()
-    # return graph.closeness(node)
 
 # Calculate the betweenness centrality of a node
 def betweennessCentrality(graph, node) -> float:
     allNodesBetweenness= graph.betweenness()
-    # print("nodebet",graph.vs.find(name=str(node)).betweenness())
-    # print("sum",sum(allNodesBetweenness))
-    # print("after divide",(graph.vs.find(name=str(node)).betweenness())/sum(allNodesBetweenness))
-    # print("inside",graph.vs.find(name=str(node)).betweenness())
     normalizeValue=(graph.vs.find(name=str(node)).betweenness())/sum(allNodesBetweenness)
     return normalizeValue
 
@@ -105,8 +95,6 @@ def betweennessCentrality(graph, node) -> float:
 
 # Calculate the local clustering coefficient of a node
 def localClusteringCoefficient(graph, node) -> float:
-    # return graph.transitivity_local_undirected(node)
-    # return graph.vs.find(name=str(node)).transitivity_local_undirected()
     node_id = graph.vs.find(name=str(node)).index
     return graph.transitivity_local_undirected(node_id)
 
@@ -148,7 +136,6 @@ def communityDetection(graph):
     return communities
 
 def communitiesToList(communities, graph):
-    # return {f'{i}': list(community) for i, community in enumerate(communities)}
     return {f'{i}': [graph.vs[node]["name"] for node in community] for i, community in enumerate(communities)}
 
 def getCommunities(network):

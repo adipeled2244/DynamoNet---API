@@ -40,7 +40,6 @@ exports.networkController = {
     }
   },
 
-  //TO DO: Change according to noor
   async addNetwork(req, res) {
     logger.info(`[addNetwork] - ${path.basename(__filename)}`);
     const networkParams = req.body;

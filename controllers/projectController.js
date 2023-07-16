@@ -3,7 +3,6 @@ const networkService = require("../services/networkService");
 const logger = require("../helpers/winston");
 const path = require("path");
 const { spawn } = require("child_process");
-const { isErrored } = require("stream");
 const userService = require("../services/userService");
 const ObjectId = require("mongoose").Types.ObjectId;
 const fs = require("fs");
@@ -14,11 +13,6 @@ exports.projectController = {
     let project;
     const projectIdParam = req.params.projectId;
     const user = req.user;
-    // if (user.projectsRefs.indexOf(projectIdParam) === -1) {
-    //   return res
-    //     .status(403)
-    //     .json({ message: "You don't have access to this project" });
-    // }
     try {
       project = await projectService.getProject(projectIdParam);
       if (project) {
@@ -49,24 +43,10 @@ exports.projectController = {
       return;
     }
   },
-  //TO DO: Change according to noor
-  /**
-   * @param {Object} req
-   * @param {Object} res
-   * @param {string} req.body.title
-   * @param {string} req.body.description
-   * @param {string} req.body.dataset
-   * @param {string} req.body.startDate
-   * @param {string} req.body.endDate
-   * @param {string} req.body.userId // not part of the project schema
-   * @param {string} req.body.userEmail // not part of the project schema -- optional
-   * @param {string} req.body.limit // not part of the project schema -- optional
-   *
-   */
+
   async addProject(req, res) {
     logger.info(`[addProject] - ${path.basename(__filename)}`);
     const projectParams = req.body;
-    // const userId = projectParams.userId;
     const userId = req.userId;
     const user = req.user;
     const io = req.io;
@@ -87,7 +67,7 @@ exports.projectController = {
     try {
       const newProject = await projectService.addProject(projectParams);
       const pythonArguments = [
-        "./python/virtual_twitter.py",
+        "./python/api_importer.py",
         `--project_id=${newProject._id}`,
         `--user_email=${userEmail}`,
       ];
@@ -118,7 +98,7 @@ exports.projectController = {
 
         io.emit("projectReady", { projectId: newProject._id });
       });
-      // TODO: needs fixing - updateUser recieves user id and params object:change this id to currentUserId when we will do autheniccation
+
       //add projectRef to user projects
       user.projectsRefs.push(newProject._id);
       const updateUserRes = await userService.updateUser(
@@ -422,11 +402,6 @@ exports.projectController = {
     logger.info(`[getProjectWithTimeRanges] - ${path.basename(__filename)}`);
     const projectIdParam = req.params.projectId;
     const user = req.user;
-    // if (user.projectsRefs.indexOf(projectIdParam) === -1) {
-    //   return res
-    //     .status(403)
-    //     .json({ message: "You don't have access to this project" });
-    // }
     let project;
     try {
       project = await projectService.getProjectWithTimeRanges(projectIdParam);

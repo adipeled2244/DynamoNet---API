@@ -1,13 +1,10 @@
-import datetime
 import sys
 from pymongo import MongoClient
 from bson import ObjectId
 import metrics_utils
 import constants
-import asyncio
-# import aiohttp
 
-from class_utils import Project, Network, Edge, User, TimeRange
+from class_utils import Network, Edge, TimeRange
 
 class MongoWrapper:
     def __init__(self, mongo_host, db_name):
@@ -303,44 +300,7 @@ class MongoWrapper:
                 "nodePositions" : network.nodePositions,
                 "edges" : [ ObjectId(edge_id) for edge_id in edges_object_ids ]
             })
-            # # Save the main network document without arrays
-            # network_document = {
-            #     "networkMetrics": network.networkMetrics,
-            #     "metricsPerEdgeType": network.metricsPerEdgeType,
-            #     "retweetNetworkMetrics": network.retweetNetworkMetrics,
-            #     "quoteNetworkMetrics": network.quoteNetworkMetrics,
-            #     "nodeMetrics": network.nodeMetrics,
-            #     "nodePositions": network.nodePositions,
-            #     "nodes" : [ str(node) for node in network.nodes ], 
-            #     "edges" : [ ObjectId(edge_id) for edge_id in edges_object_ids ],
-            # }
-            # network_id_response = networks_collection.insert_one(network_document)
-            # network_id = network_id_response.inserted_id
-
-            # # Update the other arrays in chunks
-            # other_arrays = ["retweetCommunities", "quoteCommunities", "communities"]
-            # for array_name in other_arrays:
-            #     array_values = getattr(network, array_name)
-            #     array_chunk_size = chunk_size // 10  # Adjust the chunk size for other arrays based on their expected size
-            #     array_chunks = [list(array_values)[i:i + array_chunk_size] for i in range(0, len(array_values), array_chunk_size)]
-            #     for chunk in array_chunks:
-            #         networks_collection.update_one(
-            #             {"_id": network_id},
-            #             {"$push": {
-            #                 array_name: {"$each": chunk}
-            #             }}
-            #         )
-
-            # # Update the 'centralNodes' and 'communitiesPerEdgeType' dictionaries
-            # networks_collection.update_one(
-            #     {"_id": network_id},
-            #     {"$set": {
-            #         "centralNodes": network.centralNodes,
-            #         "communitiesPerEdgeType": network.communitiesPerEdgeType
-            #     }}
-            # )
-
-            # return network_id_response
+            
         except Exception as e:
             # Removing the inserted edges from the "edges" collection
             edges_collection.delete_many({"_id": {"$in": [ObjectId(edge_id) for edge_id in edges_object_ids]}})
@@ -603,12 +563,6 @@ def get_project(project_id, mongo_host, db_name):
     mongo.close()
     return project
 
-# async def network_layout(network_id):
-#     async with aiohttp.ClientSession() as session:
-#         async with session.patch(f'{constants.backend_url}{constants.graphs_api}{network_id}') as response:
-#             return response
-
-
 def save_network(network, mongo_host, db_name):
     mongo = MongoWrapper(mongo_host, db_name)
     edges_response = mongo.save_edges_to_edge_collection(network.edges)
@@ -635,7 +589,6 @@ def save_users(users, mongo_host, db_name):
         users_response = mongo.save_users_to_node_collection(users)
     except Exception as e:
         print('error occured while saving users to node collection: (skipping most likely duplicate)', file=sys.stderr)
-        # print(e, file=sys.stderr)
         mongo.close()
         return None
     mongo.close()    
@@ -701,7 +654,6 @@ def create_time_range(network, start_date, end_date, edgeType, mongo):
 
 def save_time_range(time_range, project_id, mongo):
     network_object_id = mongo.save_network_to_networks_collection(time_range.network, [edge._id for edge in time_range.network.edges])
-    # asyncio.run(network_layout(network_object_id.inserted_id))
     time_range_object_id = mongo.save_time_range_to_timeRanges_collection(time_range, network_object_id.inserted_id)
     return mongo.insert_time_range_into_project(project_id, time_range_object_id.inserted_id)
 
@@ -729,31 +681,18 @@ def create_multiple_time_ranges(project_id, network_id, edgeType, edgeTypes, tim
             print('edgeType: {}'.format(edgeType))
             time_range = create_time_range(network, start_date, end_date, edgeType, mongo)
         else:
-            # print('edgeType: retweet')
-            # retweet_time_range = create_time_range(network, start_date, end_date, 'retweet', mongo)
-            # print('edgeType: quote')
-            # quote_time_range = create_time_range(network, start_date, end_date, 'quote', mongo)
             print('edgeType: all')
             overall_time_range = create_time_range(network, start_date, end_date, None, mongo)
             time_range = TimeRange(
                 startDate=start_date,
                 endDate=end_date,
-                # network=merge_Networks(retweet_time_range.network, quote_time_range.network)
                 network=overall_time_range.network
             )
-            # TODO: update communities and metrics per type in project.edgeTypes 
             for type in edgeTypes:
                 print('edgeType: {}'.format(type))
                 temp_time_range = create_time_range(network, start_date, end_date, type, mongo)
                 time_range.network.metricsPerEdgeType[type] = metrics_utils.calculateNetworkMetrics(temp_time_range.network)
                 time_range.network.communitiesPerEdgeType[type], time_range.network.metricsPerEdgeType[type]['modularity'] = metrics_utils.getCommunities(temp_time_range.network)
-            # # TODO: remove this when swapping to dynamic edge types
-            # retweetNetworkMetrics = metrics_utils.calculateNetworkMetrics(retweet_time_range.network)
-            # quoteNetworkMetrics = metrics_utils.calculateNetworkMetrics(quote_time_range.network)
-            # time_range.network.retweetNetworkMetrics = retweetNetworkMetrics
-            # time_range.network.quoteNetworkMetrics = quoteNetworkMetrics
-            # time_range.network.retweetCommunities = metrics_utils.getCommunities(retweet_time_range.network)
-            # time_range.network.quoteCommunities = metrics_utils.getCommunities(quote_time_range.network)
             
         print('calculating network metrics')
         networkMetrics = metrics_utils.calculateNetworkMetrics(time_range.network)
@@ -764,8 +703,7 @@ def create_multiple_time_ranges(project_id, network_id, edgeType, edgeTypes, tim
             'closeness': metrics_utils.getCentralNodes(time_range.network, 'closeness'),
             'degree': metrics_utils.getCentralNodes(time_range.network, 'degree'),
         }
-        # if time_range.network.networkMetrics["numberOfNodes"] == 0:
-        #     continue
+
         print('calculating node metrics')
         for node_id in favorite_nodes:
             node_metrics = metrics_utils.calculateNodeMetrics(time_range.network, node_id)

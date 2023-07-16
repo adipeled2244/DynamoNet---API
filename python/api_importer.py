@@ -3,7 +3,7 @@ import data_importer
 import mail_sender
 
 import constants
-from config import bearer_token, consumer_key, consumer_secret, access_token, access_token_secret, client_id, client_secret, mongo_host, email_address, email_password, app_password
+from config import mongo_host
 from mongo_utils import MongoWrapper
 
 def main(args):
@@ -31,4 +31,4 @@ if __name__ == '__main__':
     main(args)
 
 # example command line
-# python3 virtual_twitter.py --project_id=63f75a3e60d069861c5f2670 --user_email=look15up@gmail.com --limit=2
+# python3 api_importer.py --project_id=63f75a3e60d069861c5f2670 --user_email=example@dynamo.net --limit=2

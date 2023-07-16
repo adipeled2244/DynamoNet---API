@@ -134,7 +134,6 @@ exports.timeRangeController = {
 
   async deleteTimeRange(req, res) {
     logger.info(`[deleteTimeRange] - ${path.basename(__filename)}`);
-    //noy sent it in url params
     const timeRangeIdParam = req.params.timeRangeId;
     const projectIdParam = req.params.projectId;
     const user = req.user;

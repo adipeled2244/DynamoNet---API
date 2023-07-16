@@ -1,6 +1,5 @@
 import time
 import tweepy
-import json
 import datetime
 import pytz
 import sys
@@ -106,7 +105,6 @@ class TimeRange:
         self.network = network
         self.title = title
 
-# Tweepy Wrapper
 class TweepyWrapper:
     def __init__(self, bearer_token, consumer_key, consumer_secret, access_token, access_token_secret):
         self.auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
@@ -136,7 +134,6 @@ class TweepyWrapper:
     def get_retweets(self, tweet_id):
         return self.api.get_retweets(id=tweet_id)
         
-    # TODO: fix this function -- API call with since and until is not working
     def get_mentions(self, user_id, start_date, end_date, limit=None):
         # conver datetime to twitter datetime format
         start_date = start_date.strftime('%Y-%m-%dT%H:%M:%SZ')

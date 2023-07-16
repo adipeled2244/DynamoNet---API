@@ -17,7 +17,6 @@ def main(args):
     pass
 
 if __name__ == '__main__':
-    # get project_id, network_id, --favorite_nodes, and time_windows list of objects from command line
     parser = argparse.ArgumentParser(description='Create multiple time ranges for a project.')
     parser.add_argument('--project_id', help='The project id.', required=True)
     parser.add_argument('--network_id', help='The network id.', required=True)

@@ -1,16 +1,9 @@
-# required packages:
-# pip install tweepy
-# pip install pytz
-# pip install pymongo
-
-
-import asyncio
 import pytz
 from config import bearer_token, consumer_key, consumer_secret, access_token, access_token_secret
 from config import mongo_host
 import constants
 
-from class_utils import Project, TimeRange, Network, User, Edge, TweepyWrapper, Tweet
+from class_utils import Network, User, Edge, TweepyWrapper, Tweet
 import mongo_utils
 from mongo_utils import MongoWrapper
 import metrics_utils
@@ -426,5 +419,4 @@ def import_data(project_id, limit=None, db_name='test'):
     except:
         print('Error updating communities')
 
-    # asyncio.run(mongo_utils.network_layout(mergedNetwork_object_id))
     mongo.update_project_status(project_id, constants.project_ready)

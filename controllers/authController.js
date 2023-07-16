@@ -87,10 +87,4 @@ exports.authController = {
       return res.status(400).json({ message: "Logout failed" });
     }
   },
-  // async refreshToken(req, res) {
-  //   logger.info(`[refreshToken] - ${path.basename(__filename)}`);
-  //   const user = req.user;
-  //   const token = user.generateAuthToken();
-  //   res.status(200).json({ token: token });
-  // },
 };

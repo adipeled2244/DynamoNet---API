@@ -9,7 +9,6 @@ const { networkRouter } = require("./routers/networkRouter");
 const { edgeRouter } = require("./routers/edgeRouter");
 const { nodeRouter } = require("./routers/nodeRouter");
 const { timeRangeRouter } = require("./routers/timeRangeRouter");
-const { graphRouter } = require("./routers/graphRouter");
 const authJwt = require("./middlewares/authJwt");
 const socketIo = require("socket.io");
 const http = require("http");
@@ -67,15 +66,10 @@ app.use("/api/networks", networkRouter);
 app.use("/api/edges", edgeRouter);
 app.use("/api/nodes", nodeRouter);
 app.use("/api/timeRanges", timeRangeRouter);
-app.use("/api/graphs", graphRouter);
 
 app.use((req, res) => {
   res.status(404).send(`Page not found`);
 });
-
-// app.listen(port, () =>
-//   console.log(`Express server is running on port ${port}`)
-// );
 
 server.listen(port, () => {
   console.log(`Express server is running on port ${port}`);

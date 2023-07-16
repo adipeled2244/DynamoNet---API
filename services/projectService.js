@@ -135,8 +135,6 @@ async function addFavoriteNode(projectId, username) {
     { _id: projectId, favoriteNodes: { $ne: username } },
     { $addToSet: { favoriteNodes: username } }
   );
-
-  // return await Project.updateOne({ _id: projectId }, { $push: { favoriteNodes: twitterId } });
 }
 
 async function removeFavoriteNodeFromFavoriteNodes(projectId, username) {

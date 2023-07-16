@@ -1,15 +1,12 @@
-from config import bearer_token, consumer_key, consumer_secret, access_token, access_token_secret, client_id, client_secret, mongo_host, email_address, email_password, app_password
+from config import bearer_token, consumer_key, consumer_secret, access_token, access_token_secret, mongo_host
 
 import data_importer
-import class_utils
 import constants
 import mongo_utils
 import metrics_utils
 import csv
-from class_utils import Project, Network, Edge, User, TimeRange, TweepyWrapper
+from class_utils import Project, Network, Edge, TweepyWrapper
 from mongo_utils import MongoWrapper
-from bson import ObjectId
-from datetime import datetime
 from dateutil import parser
 
 def read_csv(file_path):
@@ -35,7 +32,6 @@ def main(project_id, csv_file, db_name='test'):
 
     csv_edges = csv_edges[1:] # remove header
     edges = []
-    # parser.parse
     for edge in csv_edges:
         edges.append(Edge(
             source=edge[csv_edges_columns['source']],
@@ -56,7 +52,6 @@ def main(project_id, csv_file, db_name='test'):
 
     users_dict = data_importer.get_users_by_screen_name_from_mongo(list(nodes_set))
     missing_users = [ user for user in nodes_set if user not in users_dict ]
-    # missing_users_dict = data_importer.get_users_by_screen_name_from_twitter(missing_users)
     tweepyWrapper = TweepyWrapper(bearer_token, consumer_key, consumer_secret, access_token, access_token_secret)
     missing_users_list = data_importer.get_users(tweepyWrapper, missing_users)
 
@@ -66,10 +61,6 @@ def main(project_id, csv_file, db_name='test'):
     print('Number of users: ' + str(len(users_dict)))
 
     mongo_utils.save_users(users_dict.values(), mongo_host, 'test')
-
-    # for edge in edges:
-    #     edge.source = users_dict[edge.source]
-    #     edge.destination = users_dict[edge.destination]
 
     network = Network()
     network.nodes = list(nodes_set)
@@ -84,8 +75,6 @@ def main(project_id, csv_file, db_name='test'):
         for edge in network.edges:
             if edge.edgeType == type:
                 temp_network.edges.append(edge)
-                # temp_network.nodes.add(edge.source.screen_name)
-                # temp_network.nodes.add(edge.destination.screen_name)
                 temp_network.nodes.add(edge.source)
                 temp_network.nodes.add(edge.destination)
         temp_network.networkMetrics = metrics_utils.calculateNetworkMetrics(temp_network)
@@ -141,7 +130,6 @@ import mail_sender
 import os
 
 if __name__ == '__main__':
-    # get project_id,  from command line
     argParser = argparse.ArgumentParser()
     argParser.add_argument('--project_id', help='Project ID', required=True)
     argParser.add_argument('--csv_file', help='CSV file location', required=True)
